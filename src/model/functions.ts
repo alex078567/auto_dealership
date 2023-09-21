@@ -51,6 +51,15 @@ export class ClientOrder {
 	) {
 		this.postpayment = priceOfCar - prepayment;
 	}
+	anotherDayPasses() {
+		this.daysOfShipment++;
+	}
+	countTheTotalPostpaymentSum() {
+		const differenceBetweenDays = this.daysOfShipment - this.lastDayForShipment;
+		if (differenceBetweenDays > 0) {
+			return this.postpayment - differenceBetweenDays * 0.001 * this.priceOfCar;
+		}
+	}
 }
 
 interface carsToShipmentI {
@@ -65,6 +74,8 @@ interface numberOfDaysInStorageI {
 	daysBeforeShipment: number;
 }
 export class CarDealershipStorage {
+	public totalProfit: number = 0;
+	public totalExpenses: number = 0;
 	public numberOfCars: number;
 	public numberOfDaysInStorage: numberOfDaysInStorageI[];
 	public clientOrdersArray: ClientOrder[];
@@ -80,7 +91,21 @@ export class CarDealershipStorage {
 		});
 		this.clientOrdersArray = [];
 	}
-	public placeAnOrderToHanko() {}
+	public placeAnOrderToHanko(
+		isForDealership1: boolean,
+		hankoStorage: HankoStorage,
+		orderId: number
+	) {
+		if (this.orderToHanko.length === this.orderToHankoStrategy) {
+			this.orderToHanko.forEach((order) => {
+				this.totalExpenses += order;
+				hankoStorage.addCarToMainQue({
+					isForDealership1: isForDealership1,
+					orderId: orderId,
+				});
+			});
+		}
+	}
 	public chooseRandomCar() {
 		let carToChoose = getRandomNumberBetween(1, this.numberOfCars);
 		this.numberOfDaysInStorage = this.numberOfDaysInStorage.map(
@@ -96,22 +121,7 @@ export class CarDealershipStorage {
 			}
 		);
 	}
-	private addCar() {
-		if (this.numberOfCars < this.maxStorageSize) {
-			this.numberOfCars++;
-			this.numberOfDaysInStorage.push({ payedMonth: 0, daysBeforeShipment: 0 });
-		} else {
-			throw new Error('Склад полон');
-		}
-	}
-	private removeCar() {
-		if (this.numberOfCars > 0) {
-			this.numberOfCars--;
-			this.numberOfDaysInStorage.pop;
-		} else {
-			throw new Error('Склад пуст');
-		}
-	}
+
 	public addNewOrder(clientOrder: ClientOrder) {
 		this.clientOrdersArray.push(clientOrder);
 	}
