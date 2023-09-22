@@ -139,16 +139,35 @@ export class CarDealershipStorage {
 	// 	});
 	// }
 	// доставка в ханко id = -10
-	public giveCarToClient(cars: carsToShipmentI[]) {
-		const unloadedCars = cars;
+	public unloadCarShipment(cars: carsToShipmentI[]) {
 		let newClientOrders: ClientOrder[] = this.clientOrdersArray;
-		unloadedCars.map((car) => {
-			newClientOrders = newClientOrders.filter((clientOrder) => {
-				if (car.orderId === clientOrder.orderId) {
-					this.totalProfit += clientOrder.countTheTotalPostpaymentSum();
-				}
-				return clientOrder.orderId !== car.orderId;
-			});
+		cars.forEach((car) => {
+			if (car.orderId !== -10) {
+				newClientOrders = newClientOrders.filter((clientOrder) => {
+					if (car.orderId === clientOrder.orderId) {
+						this.totalProfit += clientOrder.countTheTotalPostpaymentSum();
+					}
+					return clientOrder.orderId !== car.orderId;
+				});
+			} else {
+				let allCarsToStorage = cars.filter((car) => {
+					car.orderId === -10;
+				}).length;
+				this.numberOfDaysInStorage = this.numberOfDaysInStorage.map(
+					(numberOfDays) => {
+						if (
+							numberOfDays.daysBeforeShipment === -1 &&
+							allCarsToStorage !== 0
+						) {
+							allCarsToStorage--;
+							this.numberOfCars++;
+							return { payedMonth: 0, daysBeforeShipment: 0 };
+						}
+
+						return numberOfDays;
+					}
+				);
+			}
 		});
 	}
 
