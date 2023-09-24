@@ -314,13 +314,50 @@ for (let i = 0; i < 200; i++) {
 }
 
 function App() {
-	const [state, setState] = useState([]);
+	const [storageSize, setStorageSize] = useState(2);
 
 	useEffect(() => {}, []);
-
+	const onOptionChange = (
+		e: React.ChangeEvent<HTMLInputElement>,
+		setter: React.Dispatch<React.SetStateAction<number>>
+	) => {
+		setter(+e.target.value);
+	};
 	return (
 		<div className="main-container">
-			<div className="control-container"></div>
+			<div className="control-container">
+				<div className="radio-group">
+					<input
+						type="radio"
+						name="topping"
+						value="Regular"
+						id="regular"
+						checked={topping === 'Regular'}
+						onChange={onOptionChange}
+					/>
+					<label htmlFor="regular">Regular</label>
+
+					<input
+						type="radio"
+						name="topping"
+						value="Medium"
+						id="medium"
+						checked={topping === 'Medium'}
+						onChange={onOptionChange}
+					/>
+					<label htmlFor="medium">Medium</label>
+
+					<input
+						type="radio"
+						name="topping"
+						value="Large"
+						id="large"
+						checked={topping === 'Large'}
+						onChange={onOptionChange}
+					/>
+					<label htmlFor="large">Large</label>
+				</div>
+			</div>
 			<div
 				className="graph-container"
 				style={{
@@ -330,7 +367,7 @@ function App() {
 					alignItems: 'center',
 				}}
 			>
-				<h2>eee</h2>
+				<h2>Все доходы</h2>
 				<ResponsiveContainer width="80%" aspect={4.0 / 3.0}>
 					<LineChart
 						width={500}
@@ -343,6 +380,7 @@ function App() {
 						<YAxis />
 					</LineChart>
 				</ResponsiveContainer>
+				<h2>Расходы</h2>
 				<ResponsiveContainer width="80%" aspect={4.0 / 3.0}>
 					<LineChart
 						width={500}
@@ -356,6 +394,7 @@ function App() {
 						<YAxis />
 					</LineChart>
 				</ResponsiveContainer>
+				<h2>Прибыль</h2>
 				<ResponsiveContainer width="80%" aspect={4.0 / 3.0}>
 					<LineChart
 						width={500}
