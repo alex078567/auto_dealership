@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import './App.css';
+import './App.scss';
 import {
 	potentialClientGenerator,
 	managerFilter,
@@ -319,8 +319,10 @@ function App() {
 	useEffect(() => {}, []);
 
 	return (
-		<>
+		<div className="main-container">
+			<div className="control-container"></div>
 			<div
+				className="graph-container"
 				style={{
 					width: '100vw',
 					display: 'flex',
@@ -328,17 +330,17 @@ function App() {
 					alignItems: 'center',
 				}}
 			>
+				<h2>eee</h2>
 				<ResponsiveContainer width="80%" aspect={4.0 / 3.0}>
 					<LineChart
 						width={500}
 						height={500}
 						// @ts-ignore
 						data={dataForGraphProfit}
-						margin={{ top: 5, right: 20, bottom: 5, left: 100 }}
 					>
 						<Line type="monotone" dataKey="data" stroke="#8884d8" dot={true} />
-						<XAxis tick={{ fontSize: 10 }} dataKey="day" />
-						<YAxis tick={{ fontSize: 10 }} />
+						<XAxis dataKey="day" />
+						<YAxis />
 					</LineChart>
 				</ResponsiveContainer>
 				<ResponsiveContainer width="80%" aspect={4.0 / 3.0}>
@@ -368,7 +370,7 @@ function App() {
 					</LineChart>
 				</ResponsiveContainer>
 			</div>
-		</>
+		</div>
 	);
 }
 
