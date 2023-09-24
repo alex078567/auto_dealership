@@ -105,6 +105,8 @@ export class CarDealershipStorage {
 	public deliveryTime: number;
 	// Время погрузчика в пути
 	public daysOfShipment = 0;
+	public daysInMonth = 30;
+	public storageMonthlyPayment = 6000;
 	// едет ли погрузчик в другой салон?
 	public isCarTransporterOnRoute = false;
 	// Заказ в Ханко
@@ -139,8 +141,43 @@ export class CarDealershipStorage {
 	// 	});
 	// }
 	// доставка в ханко id = -10
+	public storageRentPayment() {
+		this.numberOfDaysInStorage = this.numberOfDaysInStorage.map(
+			(numberOfDays) => {
+				if (numberOfDays.daysBeforeShipment === -1) {
+					return numberOfDays;
+				} else {
+					const monthToPay = Math.floor(
+						numberOfDays.daysBeforeShipment / this.daysInMonth
+					);
+					if (numberOfDays.payedMonth < monthToPay) {
+						this.totalExpenses -= this.storageMonthlyPayment;
+						return { ...numberOfDays, payedMonth: numberOfDays.payedMonth + 1 };
+					} else {
+						return numberOfDays;
+					}
+				}
+			}
+		);
+	}
+	public timeToOrderFromHanko(
+		isForDealership1: boolean,
+		hankoStorage: HankoStorage
+	) {
+		if (this.orderToHankoStrategy <= this.orderToHanko.length) {
+			this.orderToHanko.forEach((price) => {
+				this.totalExpenses += price * 0.8;
+
+				hankoStorage.addCarToMainQue({
+					isForDealership1,
+					orderId: -10,
+				});
+			});
+			this.orderToHanko = [];
+		}
+	}
 	public unloadCarShipment(cars: carsToShipmentI[]) {
-		let newClientOrders: ClientOrder[] = this.clientOrdersArray;
+		let newClientOrders = this.clientOrdersArray;
 		cars.forEach((car) => {
 			if (car.orderId !== -10) {
 				newClientOrders = newClientOrders.filter((clientOrder) => {
@@ -149,9 +186,13 @@ export class CarDealershipStorage {
 					}
 					return clientOrder.orderId !== car.orderId;
 				});
+				this.clientOrdersArray = newClientOrders;
 			} else {
+				let filteredArray = cars.filter((car) => {
+					return car.orderId === -10;
+				}).length;
 				let allCarsToStorage = cars.filter((car) => {
-					car.orderId === -10;
+					return car.orderId === -10;
 				}).length;
 				this.numberOfDaysInStorage = this.numberOfDaysInStorage.map(
 					(numberOfDays) => {
@@ -169,6 +210,17 @@ export class CarDealershipStorage {
 				);
 			}
 		});
+	}
+	public checkIfShipmentArrives() {
+		if (this.deliveryTime === this.daysOfShipment) {
+			return true;
+		}
+		return false;
+	}
+	public unloadCargo() {
+		this.carsToShipmentArray.shift();
+		this.isCarTransporterOnRoute = false;
+		this.daysOfShipment = 0;
 	}
 
 	public chooseRandomCar() {
@@ -191,7 +243,7 @@ export class CarDealershipStorage {
 		this.orderToHanko.push(price);
 	}
 	public isSendCarTransporter() {
-		if (!this.isCarTransporterOnRoute) {
+		if (!this.isCarTransporterOnRoute && this.carsToShipmentArray.length > 0) {
 			this.isCarTransporterOnRoute = true;
 		}
 	}
@@ -202,6 +254,18 @@ export class CarDealershipStorage {
 		this.clientOrdersArray.map((clientOrder) => {
 			return clientOrder.anotherDayPasses();
 		});
+		this.numberOfDaysInStorage = this.numberOfDaysInStorage.map(
+			(numberOfDays) => {
+				if (numberOfDays.daysBeforeShipment === -1) {
+					return numberOfDays;
+				} else {
+					return {
+						...numberOfDays,
+						daysBeforeShipment: numberOfDays.daysBeforeShipment + 1,
+					};
+				}
+			}
+		);
 	}
 	public isCouldPlaceAnOrderToHanko() {
 		if ((this.orderToHanko.length = this.orderToHankoStrategy)) {
@@ -225,8 +289,8 @@ export class MoscowStorage {
 	public daysOfShipment1 = 0;
 	public isCarTransporterOnRoute2 = false;
 	public daysOfShipment2 = 0;
-	public carsToShipmentToDealership1Array: carsToShipmentI[] = [];
-	public carsToShipmentToDealership2Array: carsToShipmentI[] = [];
+	public carsOnTransporterToDealership1Array: carsToShipmentI[] = [];
+	public carsOnTransporterToDealership2Array: carsToShipmentI[] = [];
 	// Очередь на отправку (не поставку)
 	public shipmentQueToDealership1: carsToShipmentI[] = [];
 	public shipmentQueToDealership2: carsToShipmentI[] = [];
@@ -256,7 +320,7 @@ export class MoscowStorage {
 	public isSendCarTransporter() {
 		if (!this.isCarTransporterOnRoute1) {
 			if (this.shipmentQueToDealership1.length > this.minCapacityForShipment) {
-				this.carsToShipmentToDealership1Array.push(
+				this.carsOnTransporterToDealership1Array.push(
 					...this.shipmentQueToDealership1.splice(
 						0,
 						this.minCapacityForShipment + 1
@@ -269,7 +333,7 @@ export class MoscowStorage {
 				this.shipmentQueToDealership1.length >
 				this.minCapacityForShipment - 1
 			) {
-				this.carsToShipmentToDealership1Array.push(
+				this.carsOnTransporterToDealership1Array.push(
 					...this.shipmentQueToDealership1.splice(
 						0,
 						this.minCapacityForShipment
@@ -281,7 +345,7 @@ export class MoscowStorage {
 		}
 		if (!this.isCarTransporterOnRoute2) {
 			if (this.shipmentQueToDealership2.length > this.minCapacityForShipment) {
-				this.carsToShipmentToDealership2Array.push(
+				this.carsOnTransporterToDealership2Array.push(
 					...this.shipmentQueToDealership2.splice(
 						0,
 						this.minCapacityForShipment + 1
@@ -294,7 +358,7 @@ export class MoscowStorage {
 				this.shipmentQueToDealership2.length >
 				this.minCapacityForShipment - 1
 			) {
-				this.carsToShipmentToDealership2Array.push(
+				this.carsOnTransporterToDealership2Array.push(
 					...this.shipmentQueToDealership2.splice(
 						0,
 						this.minCapacityForShipment
@@ -306,12 +370,12 @@ export class MoscowStorage {
 		}
 	}
 	unloadCargo1() {
-		this.shipmentQueToDealership1 = [];
+		this.carsOnTransporterToDealership1Array = [];
 		this.isCarTransporterOnRoute1 = false;
 		this.daysOfShipment1 = 0;
 	}
 	unloadCargo2() {
-		this.shipmentQueToDealership2 = [];
+		this.carsOnTransporterToDealership2Array = [];
 		this.isCarTransporterOnRoute2 = false;
 		this.daysOfShipment2 = 0;
 	}
