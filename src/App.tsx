@@ -11,7 +11,14 @@ import {
 	MoscowStorage,
 	HankoStorage,
 } from './model/functions';
-import { Line, LineChart, ResponsiveContainer, XAxis, YAxis } from 'recharts';
+import {
+	Line,
+	LineChart,
+	ResponsiveContainer,
+	Tooltip,
+	XAxis,
+	YAxis,
+} from 'recharts';
 
 // Выбор случайной машины
 const carSelector = () => {
@@ -46,11 +53,26 @@ const storageSelector = () => {
 			return 4;
 	}
 };
+// Выбор случайного склада где машина в наличии, если склады автосалонов пусты
+const storageSelectorIfDealeshipStorageIsEmpty = () => {
+	const carId = getRandomNumberBetween(1, 4);
+	switch (carId) {
+		case 1:
+			return 3;
+
+		default:
+			return 4;
+	}
+};
 
 // Генерация предоплаты
 const prepaymentGenerator = (carPrice: number, minSum: number): number => {
 	const carPriceThousands = carPrice / 1000;
-	const prepayment = getRandomNumberBetween(minSum, carPriceThousands);
+	const minSumThosands = minSum / 1000;
+
+	const prepayment = getRandomNumberBetween(minSumThosands, carPriceThousands);
+	console.log('prepayment generator');
+	console.log(carPriceThousands, minSumThosands, prepayment);
 	return prepayment * 1000;
 };
 
@@ -75,15 +97,18 @@ interface dataForGraphI {
 let dataForGraphProfit: dataForGraphI[] = [];
 let dataForGraphExpenses: dataForGraphI[] = [];
 let dataForGraphTotalProfit: dataForGraphI[] = [];
+let dataForGraphStorageMonthlyPaymentTotal: dataForGraphI[] = [];
+let dataForGraphNumberOfCarsInStorage1: dataForGraphI[] = [];
+let dataForGraphNumberOfCarsInStorage2: dataForGraphI[] = [];
 let totalSum = 0;
-let totalExpenses = 0;
+let totalExpenses = -1000000;
 const STORAGE_MONTHLY_PAYMENT = 6000;
 const DAYS_IN_MONTH = 30;
 let orderId = 0;
-const hankoStorage = new HankoStorage(2, 5);
-const moscowStorage = new MoscowStorage(2, 5);
-const carDealership1 = new CarDealershipStorage(20, 2, 4);
-const carDealership2 = new CarDealershipStorage(20, 2, 4);
+const hankoStorage = new HankoStorage(10, 15);
+const moscowStorage = new MoscowStorage(5, 5);
+const carDealership1 = new CarDealershipStorage(8, 3, 4);
+const carDealership2 = new CarDealershipStorage(8, 3, 4);
 
 let currentOrdersDealership1 = [];
 let currentOrdersDealership2 = [];
@@ -120,7 +145,7 @@ for (let i = 0; i < 200; i++) {
 			orderId,
 			selectedCarPrice,
 			selectedStorage,
-			prepaymentGenerator(selectedCarPrice, 900),
+			prepaymentGenerator(selectedCarPrice, selectedCarPrice / 2),
 			selectLastDayOfShipment(selectedStorage)
 		);
 
@@ -134,7 +159,7 @@ for (let i = 0; i < 200; i++) {
 			orderId,
 			selectedCarPrice,
 			selectedStorage,
-			prepaymentGenerator(selectedCarPrice, 900),
+			prepaymentGenerator(selectedCarPrice, selectedCarPrice / 2),
 			selectLastDayOfShipment(selectedStorage)
 		);
 
@@ -149,79 +174,101 @@ for (let i = 0; i < 200; i++) {
 	//-----------------------------
 
 	currentOrdersDealership1.forEach((order: ClientOrder) => {
+		const newOrder = order;
 		// если машина на складе автосалона
-		if (order.storageId === 1) {
+		if (newOrder.storageId === 2 && carDealership2.numberOfCars == 0) {
+			newOrder.storageId = 1;
+		}
+		if (newOrder.storageId === 1 && carDealership1.numberOfCars == 0) {
+			newOrder.storageId = 2;
+			if (newOrder.storageId === 2 && carDealership2.numberOfCars == 0) {
+				newOrder.storageId = storageSelectorIfDealeshipStorageIsEmpty();
+			}
+		}
+
+		if (newOrder.storageId === 1) {
 			carDealership1.chooseRandomCar();
-			carDealership1.addToHankoQue(order.priceOfCar);
-			totalSum += order.priceOfCar;
+			carDealership1.addToHankoQue(newOrder.priceOfCar);
+			totalSum += newOrder.priceOfCar;
 		}
 		// если в друом автосалоне
-		if (order.storageId === 2) {
-			totalSum += order.prepayment;
-			carDealership1.addNewOrder(order);
+		if (newOrder.storageId === 2) {
+			totalSum += newOrder.prepayment;
+			carDealership1.addNewOrder(newOrder);
 			carDealership2.chooseRandomCar();
 			carDealership2.carsToShipmentArray.push({
-				orderId: order.orderId,
+				orderId: newOrder.orderId,
 			});
-			carDealership2.addToHankoQue(order.priceOfCar);
+			carDealership2.addToHankoQue(newOrder.priceOfCar);
 		}
 		// если на складе в Москве
-		if (order.storageId === 3) {
+		if (newOrder.storageId === 3) {
 			console.log('storage 3');
-			totalSum += order.prepayment;
-			totalExpenses += order.priceOfCar * 0.8;
-			carDealership1.addNewOrder(order);
+			totalSum += newOrder.prepayment;
+			totalExpenses += newOrder.priceOfCar * 0.9;
+			carDealership1.addNewOrder(newOrder);
 			moscowStorage.addCarToShipmentQueToDealership1({
-				orderId: order.orderId,
+				orderId: newOrder.orderId,
 			});
 		}
 		// если на складе в Ханко
-		if (order.storageId === 4) {
+		if (newOrder.storageId === 4) {
 			console.log('storage 4');
-			totalSum += order.prepayment;
-			totalExpenses += order.priceOfCar * 0.9;
-			carDealership1.addNewOrder(order);
+			totalSum += newOrder.prepayment;
+			totalExpenses += newOrder.priceOfCar * 0.8;
+			carDealership1.addNewOrder(newOrder);
 			hankoStorage.addCarToMainQue({
 				isForDealership1: true,
-				orderId: order.orderId,
+				orderId: newOrder.orderId,
 			});
 		}
 	});
 
 	currentOrdersDealership2.forEach((order: ClientOrder) => {
+		const newOrder = order;
 		// если машина на складе автосалона
-		if (order.storageId === 2) {
+		if (newOrder.storageId === 1 && carDealership1.numberOfCars == 0) {
+			newOrder.storageId = 2;
+		}
+		if (newOrder.storageId === 2 && carDealership2.numberOfCars == 0) {
+			newOrder.storageId = 1;
+			if (newOrder.storageId === 1 && carDealership1.numberOfCars == 0) {
+				newOrder.storageId = storageSelectorIfDealeshipStorageIsEmpty();
+			}
+		}
+		// если машина на складе автосалона
+		if (newOrder.storageId === 2) {
 			carDealership2.chooseRandomCar();
-			carDealership2.addToHankoQue(order.priceOfCar);
-			totalSum += order.priceOfCar;
+			carDealership2.addToHankoQue(newOrder.priceOfCar);
+			totalSum += newOrder.priceOfCar;
 		}
 		// если в друом автосалоне
-		if (order.storageId === 1) {
-			totalSum += order.prepayment;
-			carDealership2.addNewOrder(order);
+		if (newOrder.storageId === 1) {
+			totalSum += newOrder.prepayment;
+			carDealership2.addNewOrder(newOrder);
 			carDealership1.chooseRandomCar();
 			carDealership1.carsToShipmentArray.push({
-				orderId: order.orderId,
+				orderId: newOrder.orderId,
 			});
-			carDealership1.addToHankoQue(order.priceOfCar);
+			carDealership1.addToHankoQue(newOrder.priceOfCar);
 		}
 		// если на складе в Москве
-		if (order.storageId === 3) {
-			totalSum += order.prepayment;
-			totalExpenses += order.priceOfCar * 0.8;
-			carDealership2.addNewOrder(order);
+		if (newOrder.storageId === 3) {
+			totalSum += newOrder.prepayment;
+			totalExpenses += newOrder.priceOfCar * 0.9;
+			carDealership2.addNewOrder(newOrder);
 			moscowStorage.addCarToShipmentQueToDealership2({
-				orderId: order.orderId,
+				orderId: newOrder.orderId,
 			});
 		}
 		// если на складе в Ханко
-		if (order.storageId === 4) {
-			totalSum += order.prepayment;
-			totalExpenses += order.priceOfCar * 0.9;
-			carDealership2.addNewOrder(order);
+		if (newOrder.storageId === 4) {
+			totalSum += newOrder.prepayment;
+			totalExpenses += newOrder.priceOfCar * 0.8;
+			carDealership2.addNewOrder(newOrder);
 			hankoStorage.addCarToMainQue({
 				isForDealership1: false,
-				orderId: order.orderId,
+				orderId: newOrder.orderId,
 			});
 		}
 	});
@@ -307,10 +354,26 @@ for (let i = 0; i < 200; i++) {
 		data: totalSum - totalExpenses,
 		day: i,
 	});
+	dataForGraphStorageMonthlyPaymentTotal.push({
+		data:
+			carDealership1.storageMonthlyPaymentTotal +
+			carDealership2.storageMonthlyPaymentTotal,
+		day: i,
+	});
+	dataForGraphNumberOfCarsInStorage1.push({
+		data: carDealership1.numberOfCars,
+		day: i,
+	});
+	dataForGraphNumberOfCarsInStorage2.push({
+		data: carDealership2.numberOfCars,
+		day: i,
+	});
 	console.log(moscowStorage);
 	console.log(hankoStorage);
 	console.log(totalExpenses);
 	console.log(totalSum);
+	console.log(carDealership1.averageDeliveryTime);
+	console.log(carDealership2.averageDeliveryTime);
 }
 
 function App() {
@@ -336,6 +399,7 @@ function App() {
 						data={dataForGraphProfit}
 						margin={{ top: 5, right: 20, bottom: 5, left: 100 }}
 					>
+						<Tooltip />
 						<Line type="monotone" dataKey="data" stroke="#8884d8" dot={true} />
 						<XAxis tick={{ fontSize: 10 }} dataKey="day" />
 						<YAxis tick={{ fontSize: 10 }} />
@@ -349,6 +413,7 @@ function App() {
 						data={dataForGraphExpenses}
 						margin={{ top: 5, right: 20, bottom: 5, left: 0 }}
 					>
+						<Tooltip />
 						<Line type="monotone" dataKey="data" stroke="#8884d8" dot={true} />
 						<XAxis dataKey="day" />
 						<YAxis />
@@ -362,6 +427,49 @@ function App() {
 						data={dataForGraphTotalProfit}
 						margin={{ top: 5, right: 20, bottom: 5, left: 0 }}
 					>
+						<Tooltip />
+						<Line type="monotone" dataKey="data" stroke="#8884d8" dot={true} />
+						<XAxis dataKey="day" />
+						<YAxis />
+					</LineChart>
+				</ResponsiveContainer>
+				<ResponsiveContainer width="80%" aspect={4.0 / 3.0}>
+					<LineChart
+						width={500}
+						height={500}
+						// @ts-ignore
+						data={dataForGraphStorageMonthlyPaymentTotal}
+						margin={{ top: 5, right: 20, bottom: 5, left: 0 }}
+					>
+						<Tooltip />
+						<Line type="monotone" dataKey="data" stroke="#8884d8" dot={true} />
+						<XAxis dataKey="day" />
+						<YAxis />
+					</LineChart>
+				</ResponsiveContainer>
+				<ResponsiveContainer width="80%" aspect={4.0 / 3.0}>
+					<LineChart
+						width={500}
+						height={500}
+						// @ts-ignore
+						data={dataForGraphNumberOfCarsInStorage1}
+						margin={{ top: 5, right: 20, bottom: 5, left: 0 }}
+					>
+						<Tooltip />
+						<Line type="monotone" dataKey="data" stroke="#8884d8" dot={true} />
+						<XAxis dataKey="day" />
+						<YAxis />
+					</LineChart>
+				</ResponsiveContainer>
+				<ResponsiveContainer width="80%" aspect={4.0 / 3.0}>
+					<LineChart
+						width={500}
+						height={500}
+						// @ts-ignore
+						data={dataForGraphNumberOfCarsInStorage2}
+						margin={{ top: 5, right: 20, bottom: 5, left: 0 }}
+					>
+						<Tooltip />
 						<Line type="monotone" dataKey="data" stroke="#8884d8" dot={true} />
 						<XAxis dataKey="day" />
 						<YAxis />

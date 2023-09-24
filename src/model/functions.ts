@@ -106,6 +106,12 @@ export class CarDealershipStorage {
 	// Время погрузчика в пути
 	public daysOfShipment = 0;
 	public daysInMonth = 30;
+
+	private totalNumberOfDaysInDelivery = 0;
+	private totalNumbersOfDeliveredCars = 0;
+	public averageDeliveryTime = 0;
+
+	public storageMonthlyPaymentTotal = 0;
 	public storageMonthlyPayment = 6000;
 	// едет ли погрузчик в другой салон?
 	public isCarTransporterOnRoute = false;
@@ -151,7 +157,8 @@ export class CarDealershipStorage {
 						numberOfDays.daysBeforeShipment / this.daysInMonth
 					);
 					if (numberOfDays.payedMonth < monthToPay) {
-						this.totalExpenses -= this.storageMonthlyPayment;
+						this.totalExpenses += this.storageMonthlyPayment;
+						this.storageMonthlyPaymentTotal += this.storageMonthlyPayment;
 						return { ...numberOfDays, payedMonth: numberOfDays.payedMonth + 1 };
 					} else {
 						return numberOfDays;
@@ -183,6 +190,13 @@ export class CarDealershipStorage {
 				newClientOrders = newClientOrders.filter((clientOrder) => {
 					if (car.orderId === clientOrder.orderId) {
 						this.totalProfit += clientOrder.countTheTotalPostpaymentSum();
+						if (clientOrder.storageId !== 1 && clientOrder.storageId !== 2) {
+							this.totalNumberOfDaysInDelivery += clientOrder.daysOfShipment;
+							this.totalNumbersOfDeliveredCars += 1;
+							this.averageDeliveryTime =
+								this.totalNumberOfDaysInDelivery /
+								this.totalNumbersOfDeliveredCars;
+						}
 					}
 					return clientOrder.orderId !== car.orderId;
 				});
@@ -244,6 +258,7 @@ export class CarDealershipStorage {
 	}
 	public isSendCarTransporter() {
 		if (!this.isCarTransporterOnRoute && this.carsToShipmentArray.length > 0) {
+			this.totalExpenses += 15000;
 			this.isCarTransporterOnRoute = true;
 		}
 	}
