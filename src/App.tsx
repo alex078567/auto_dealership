@@ -380,6 +380,9 @@ for (let i = 0; i < 200; i++) {
 
 function App() {
 	const [storageSize, setStorageSize] = useState(2);
+	const [orderStrategy, setOrderStrategy] = useState(2);
+	const [hankoTransporterSize, setHankoTransporterSize] = useState(3);
+	const [moscowTransporterSize, setMoscowTransporterSize] = useState(3);
 
 	useEffect(() => {}, []);
 	const onOptionChange = (
@@ -392,42 +395,325 @@ function App() {
 		<div className="main-container">
 			<div className="control-container">
 				<div className="radio-group">
+					<h3>Управление размером склада</h3>
 					<div className="radio-group__item">
 						<input
 							type="radio"
-							name="topping"
-							value="1"
-							id="regular"
-							checked={storageSize === 1}
+							name="storage"
+							value="2"
+							id="2"
+							checked={storageSize === 2}
 							onChange={(e) => {
 								onOptionChange(e, setStorageSize);
 							}}
 						/>
-						<label htmlFor="regular">Regular</label>
+						<label htmlFor="2">2</label>
 					</div>
-					<input
-						type="radio"
-						name="topping"
-						value="2"
-						id="medium"
-						checked={storageSize === 2}
-						onChange={(e) => {
-							onOptionChange(e, setStorageSize);
-						}}
-					/>
-					<label htmlFor="medium">Medium</label>
-
-					<input
-						type="radio"
-						name="topping"
-						value="3"
-						id="large"
-						checked={storageSize === 3}
-						onChange={(e) => {
-							onOptionChange(e, setStorageSize);
-						}}
-					/>
-					<label htmlFor="large">Large</label>
+					<div className="radio-group__item">
+						<input
+							type="radio"
+							name="storage"
+							value="4"
+							id="4"
+							checked={storageSize === 4}
+							onChange={(e) => {
+								onOptionChange(e, setStorageSize);
+							}}
+						/>
+						<label htmlFor="4">4</label>
+					</div>
+					<div className="radio-group__item">
+						<input
+							type="radio"
+							name="storage"
+							value="6"
+							id="6"
+							checked={storageSize === 6}
+							onChange={(e) => {
+								onOptionChange(e, setStorageSize);
+							}}
+						/>
+						<label htmlFor="6">6</label>
+					</div>
+					<div className="radio-group__item">
+						<input
+							type="radio"
+							name="storage"
+							value="8"
+							id="8"
+							checked={storageSize === 8}
+							onChange={(e) => {
+								onOptionChange(e, setStorageSize);
+							}}
+						/>
+						<label htmlFor="8">8</label>
+					</div>
+					<div className="radio-group__item">
+						<input
+							type="radio"
+							name="storage"
+							value="10"
+							id="10"
+							checked={storageSize === 10}
+							onChange={(e) => {
+								onOptionChange(e, setStorageSize);
+							}}
+						/>
+						<label htmlFor="10">10</label>
+					</div>
+					<div className="radio-group__item">
+						<input
+							type="radio"
+							name="storage"
+							value="12"
+							id="12"
+							checked={storageSize === 12}
+							onChange={(e) => {
+								onOptionChange(e, setStorageSize);
+							}}
+						/>
+						<label htmlFor="12">12</label>
+					</div>
+					<div className="radio-group__item">
+						<input
+							type="radio"
+							name="storage"
+							value="16"
+							id="16"
+							checked={storageSize === 16}
+							onChange={(e) => {
+								onOptionChange(e, setStorageSize);
+							}}
+						/>
+						<label htmlFor="16">16</label>
+					</div>
+					<div className="radio-group__item">
+						<input
+							type="radio"
+							name="storage"
+							value="20"
+							id="20"
+							checked={storageSize === 20}
+							onChange={(e) => {
+								onOptionChange(e, setStorageSize);
+							}}
+						/>
+						<label htmlFor="20">20</label>
+					</div>
+				</div>
+				<div className="radio-group">
+					<h3>Стратегия заказа авто</h3>
+					<div className="radio-group__item">
+						<input
+							type="radio"
+							name="strategy"
+							value="2"
+							id="2"
+							checked={orderStrategy === 2}
+							onChange={(e) => {
+								onOptionChange(e, setOrderStrategy);
+							}}
+						/>
+						<label htmlFor="2">2</label>
+					</div>
+					<div className="radio-group__item">
+						<input
+							type="radio"
+							name="strategy"
+							value="4"
+							id="4"
+							checked={orderStrategy === 4}
+							onChange={(e) => {
+								onOptionChange(e, setOrderStrategy);
+							}}
+						/>
+						<label htmlFor="4">4</label>
+					</div>
+					<div className="radio-group__item">
+						<input
+							type="radio"
+							name="strategy"
+							value="6"
+							id="6"
+							checked={orderStrategy === 6}
+							onChange={(e) => {
+								onOptionChange(e, setOrderStrategy);
+							}}
+						/>
+						<label htmlFor="6">6</label>
+					</div>
+					<div className="radio-group__item">
+						<input
+							type="radio"
+							name="strategy"
+							value="8"
+							id="8"
+							checked={orderStrategy === 8}
+							onChange={(e) => {
+								onOptionChange(e, setOrderStrategy);
+							}}
+						/>
+						<label htmlFor="8">8</label>
+					</div>
+					<div className="radio-group__item">
+						<input
+							type="radio"
+							name="strategy"
+							value="10"
+							id="10"
+							checked={orderStrategy === 10}
+							onChange={(e) => {
+								onOptionChange(e, setOrderStrategy);
+							}}
+						/>
+						<label htmlFor="10">10</label>
+					</div>
+					<div className="radio-group__item">
+						<input
+							type="radio"
+							name="strategy"
+							value="12"
+							id="12"
+							checked={orderStrategy === 12}
+							onChange={(e) => {
+								onOptionChange(e, setOrderStrategy);
+							}}
+						/>
+						<label htmlFor="12">12</label>
+					</div>
+					<div className="radio-group__item">
+						<input
+							type="radio"
+							name="strategy"
+							value="16"
+							id="16"
+							checked={orderStrategy === 16}
+							onChange={(e) => {
+								onOptionChange(e, setOrderStrategy);
+							}}
+						/>
+						<label htmlFor="16">16</label>
+					</div>
+					<div className="radio-group__item">
+						<input
+							type="radio"
+							name="strategy"
+							value="20"
+							id="20"
+							checked={orderStrategy === 20}
+							onChange={(e) => {
+								onOptionChange(e, setOrderStrategy);
+							}}
+						/>
+						<label htmlFor="20">20</label>
+					</div>
+				</div>
+				<div className="radio-group">
+					<h3>Размер перевозчика из москвы</h3>
+					<div className="radio-group__item">
+						<input
+							type="radio"
+							name="moscowTransporter"
+							value="2"
+							id="2"
+							checked={moscowTransporterSize === 2}
+							onChange={(e) => {
+								onOptionChange(e, setMoscowTransporterSize);
+							}}
+						/>
+						<label htmlFor="2">2</label>
+					</div>
+					<div className="radio-group__item">
+						<input
+							type="radio"
+							name="moscowTransporter"
+							value="4"
+							id="4"
+							checked={moscowTransporterSize === 4}
+							onChange={(e) => {
+								onOptionChange(e, setMoscowTransporterSize);
+							}}
+						/>
+						<label htmlFor="4">4</label>
+					</div>
+					<div className="radio-group__item">
+						<input
+							type="radio"
+							name="moscowTransporter"
+							value="6"
+							id="6"
+							checked={moscowTransporterSize === 6}
+							onChange={(e) => {
+								onOptionChange(e, setMoscowTransporterSize);
+							}}
+						/>
+						<label htmlFor="6">6</label>
+					</div>
+					<div className="radio-group__item">
+						<input
+							type="radio"
+							name="moscowTransporter"
+							value="8"
+							id="8"
+							checked={moscowTransporterSize === 8}
+							onChange={(e) => {
+								onOptionChange(e, setMoscowTransporterSize);
+							}}
+						/>
+						<label htmlFor="8">8</label>
+					</div>
+					<div className="radio-group__item">
+						<input
+							type="radio"
+							name="moscowTransporter"
+							value="10"
+							id="10"
+							checked={moscowTransporterSize === 10}
+							onChange={(e) => {
+								onOptionChange(e, setMoscowTransporterSize);
+							}}
+						/>
+						<label htmlFor="10">10</label>
+					</div>
+					<div className="radio-group__item">
+						<input
+							type="radio"
+							name="moscowTransporter"
+							value="12"
+							id="12"
+							checked={moscowTransporterSize === 12}
+							onChange={(e) => {
+								onOptionChange(e, setMoscowTransporterSize);
+							}}
+						/>
+						<label htmlFor="12">12</label>
+					</div>
+					<div className="radio-group__item">
+						<input
+							type="radio"
+							name="moscowTransporter"
+							value="16"
+							id="16"
+							checked={moscowTransporterSize === 16}
+							onChange={(e) => {
+								onOptionChange(e, setMoscowTransporterSize);
+							}}
+						/>
+						<label htmlFor="16">16</label>
+					</div>
+					<div className="radio-group__item">
+						<input
+							type="radio"
+							name="moscowTransporter"
+							value="20"
+							id="20"
+							checked={moscowTransporterSize === 20}
+							onChange={(e) => {
+								onOptionChange(e, setMoscowTransporterSize);
+							}}
+						/>
+						<label htmlFor="20">20</label>
+					</div>
 				</div>
 			</div>
 			<div className="graph-container">
