@@ -1,0 +1,32 @@
+*,
+*::after,
+*::before {
+	margin: 0;
+	padding: 0;
+	box-sizing: inherit;
+}
+
+html {
+	font-size: 62.5%;
+}
+
+body {
+	box-sizing: border-box;
+}
+
+.main-container {
+	display: flex;
+	padding: 10rem;
+	width: 100vw;
+}
+.control-container {
+	flex-basis: 20%;
+}
+.graph-container {
+	flex-basis: 80%;
+}
+.graph-container__graph {
+	width: 80%;
+}
+.radio-group {
+}

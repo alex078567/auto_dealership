@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import './App.css';
+import './App.scss';
 import {
 	potentialClientGenerator,
 	managerFilter,
@@ -93,7 +93,7 @@ interface dataForGraphI {
 	data: number;
 	day: number;
 }
-
+let totalClients = 0;
 let dataForGraphProfit: dataForGraphI[] = [];
 let dataForGraphExpenses: dataForGraphI[] = [];
 let dataForGraphTotalProfit: dataForGraphI[] = [];
@@ -135,6 +135,7 @@ for (let i = 0; i < 200; i++) {
 	console.log('real clients');
 	console.log(actualClientsDealership1);
 	console.log(actualClientsDealership2);
+	totalClients += actualClientsDealership1 + actualClientsDealership2;
 	//-------------------------------
 	// Генератор заявок для каждого клиента
 	//-------------------------------
@@ -374,109 +375,195 @@ for (let i = 0; i < 200; i++) {
 	console.log(totalSum);
 	console.log(carDealership1.averageDeliveryTime);
 	console.log(carDealership2.averageDeliveryTime);
+	console.log(totalClients);
 }
 
 function App() {
-	const [state, setState] = useState([]);
+	const [storageSize, setStorageSize] = useState(2);
 
 	useEffect(() => {}, []);
-
+	const onOptionChange = (
+		e: React.ChangeEvent<HTMLInputElement>,
+		setter: React.Dispatch<React.SetStateAction<number>>
+	) => {
+		setter(+e.target.value);
+	};
 	return (
-		<>
-			<div
-				style={{
-					width: '100vw',
-					display: 'flex',
-					flexDirection: 'column',
-					alignItems: 'center',
-				}}
-			>
-				<ResponsiveContainer width="80%" aspect={4.0 / 3.0}>
-					<LineChart
-						width={500}
-						height={500}
-						// @ts-ignore
-						data={dataForGraphProfit}
-						margin={{ top: 5, right: 20, bottom: 5, left: 100 }}
-					>
-						<Tooltip />
-						<Line type="monotone" dataKey="data" stroke="#8884d8" dot={true} />
-						<XAxis tick={{ fontSize: 10 }} dataKey="day" />
-						<YAxis tick={{ fontSize: 10 }} />
-					</LineChart>
-				</ResponsiveContainer>
-				<ResponsiveContainer width="80%" aspect={4.0 / 3.0}>
-					<LineChart
-						width={500}
-						height={500}
-						// @ts-ignore
-						data={dataForGraphExpenses}
-						margin={{ top: 5, right: 20, bottom: 5, left: 0 }}
-					>
-						<Tooltip />
-						<Line type="monotone" dataKey="data" stroke="#8884d8" dot={true} />
-						<XAxis dataKey="day" />
-						<YAxis />
-					</LineChart>
-				</ResponsiveContainer>
-				<ResponsiveContainer width="80%" aspect={4.0 / 3.0}>
-					<LineChart
-						width={500}
-						height={500}
-						// @ts-ignore
-						data={dataForGraphTotalProfit}
-						margin={{ top: 5, right: 20, bottom: 5, left: 0 }}
-					>
-						<Tooltip />
-						<Line type="monotone" dataKey="data" stroke="#8884d8" dot={true} />
-						<XAxis dataKey="day" />
-						<YAxis />
-					</LineChart>
-				</ResponsiveContainer>
-				<ResponsiveContainer width="80%" aspect={4.0 / 3.0}>
-					<LineChart
-						width={500}
-						height={500}
-						// @ts-ignore
-						data={dataForGraphStorageMonthlyPaymentTotal}
-						margin={{ top: 5, right: 20, bottom: 5, left: 0 }}
-					>
-						<Tooltip />
-						<Line type="monotone" dataKey="data" stroke="#8884d8" dot={true} />
-						<XAxis dataKey="day" />
-						<YAxis />
-					</LineChart>
-				</ResponsiveContainer>
-				<ResponsiveContainer width="80%" aspect={4.0 / 3.0}>
-					<LineChart
-						width={500}
-						height={500}
-						// @ts-ignore
-						data={dataForGraphNumberOfCarsInStorage1}
-						margin={{ top: 5, right: 20, bottom: 5, left: 0 }}
-					>
-						<Tooltip />
-						<Line type="monotone" dataKey="data" stroke="#8884d8" dot={true} />
-						<XAxis dataKey="day" />
-						<YAxis />
-					</LineChart>
-				</ResponsiveContainer>
-				<ResponsiveContainer width="80%" aspect={4.0 / 3.0}>
-					<LineChart
-						width={500}
-						height={500}
-						// @ts-ignore
-						data={dataForGraphNumberOfCarsInStorage2}
-						margin={{ top: 5, right: 20, bottom: 5, left: 0 }}
-					>
-						<Tooltip />
-						<Line type="monotone" dataKey="data" stroke="#8884d8" dot={true} />
-						<XAxis dataKey="day" />
-						<YAxis />
-					</LineChart>
-				</ResponsiveContainer>
+		<div className="main-container">
+			<div className="control-container">
+				<div className="radio-group">
+					<div className="radio-group__item">
+						<input
+							type="radio"
+							name="topping"
+							value="1"
+							id="regular"
+							checked={storageSize === 1}
+							onChange={(e) => {
+								onOptionChange(e, setStorageSize);
+							}}
+						/>
+						<label htmlFor="regular">Regular</label>
+					</div>
+					<input
+						type="radio"
+						name="topping"
+						value="2"
+						id="medium"
+						checked={storageSize === 2}
+						onChange={(e) => {
+							onOptionChange(e, setStorageSize);
+						}}
+					/>
+					<label htmlFor="medium">Medium</label>
+
+					<input
+						type="radio"
+						name="topping"
+						value="3"
+						id="large"
+						checked={storageSize === 3}
+						onChange={(e) => {
+							onOptionChange(e, setStorageSize);
+						}}
+					/>
+					<label htmlFor="large">Large</label>
+				</div>
 			</div>
-		</>
+			<div className="graph-container">
+				<div className="graph-container__graph">
+					<h2>Доходы</h2>
+					<ResponsiveContainer width="100%" aspect={4.0 / 3.0}>
+						<LineChart
+							width={500}
+							height={500}
+							// @ts-ignore
+							data={dataForGraphProfit}
+						>
+							<Tooltip />
+							<Line
+								type="monotone"
+								dataKey="data"
+								stroke="#8884d8"
+								dot={true}
+							/>
+							<XAxis dataKey="day" />
+							<YAxis />
+						</LineChart>
+					</ResponsiveContainer>
+				</div>
+				<div className="graph-container__graph">
+					<h2>Расходы</h2>
+					<ResponsiveContainer width="100%" aspect={4.0 / 3.0}>
+						<LineChart
+							width={500}
+							height={500}
+							// @ts-ignore
+							data={dataForGraphExpenses}
+							margin={{ top: 5, right: 20, bottom: 5, left: 0 }}
+						>
+							<Tooltip />
+							<Line
+								type="monotone"
+								dataKey="data"
+								stroke="#8884d8"
+								dot={true}
+							/>
+							<XAxis dataKey="day" />
+							<YAxis />
+						</LineChart>
+					</ResponsiveContainer>
+				</div>
+				<div className="graph-container__graph">
+					<h2>Прибыль</h2>
+					<ResponsiveContainer width="100%" aspect={4.0 / 3.0}>
+						<LineChart
+							width={500}
+							height={500}
+							// @ts-ignore
+							data={dataForGraphTotalProfit}
+							margin={{ top: 5, right: 20, bottom: 5, left: 0 }}
+						>
+							<Tooltip />
+							<Line
+								type="monotone"
+								dataKey="data"
+								stroke="#8884d8"
+								dot={true}
+							/>
+							<XAxis dataKey="day" />
+							<YAxis />
+						</LineChart>
+					</ResponsiveContainer>
+				</div>
+				<div className="graph-container__graph">
+					<h2>Ежемесячная плата за хранение</h2>
+					<ResponsiveContainer width="100%" aspect={4.0 / 3.0}>
+						<LineChart
+							width={500}
+							height={500}
+							// @ts-ignore
+							data={dataForGraphStorageMonthlyPaymentTotal}
+							margin={{ top: 5, right: 20, bottom: 5, left: 0 }}
+						>
+							<Tooltip />
+							<Line
+								type="monotone"
+								dataKey="data"
+								stroke="#8884d8"
+								dot={true}
+							/>
+							<XAxis dataKey="day" />
+							<YAxis />
+						</LineChart>
+					</ResponsiveContainer>
+				</div>
+				<div className="graph-container__graph">
+					<h2>Количество машин на складе автосалона 1</h2>
+					<ResponsiveContainer width="100%" aspect={4.0 / 3.0}>
+						<LineChart
+							width={500}
+							height={500}
+							// @ts-ignore
+							data={dataForGraphNumberOfCarsInStorage1}
+							margin={{ top: 5, right: 20, bottom: 5, left: 0 }}
+						>
+							<Tooltip />
+							<Line
+								type="monotone"
+								dataKey="data"
+								stroke="#8884d8"
+								dot={true}
+							/>
+							<XAxis dataKey="day" />
+							<YAxis />
+						</LineChart>
+					</ResponsiveContainer>
+				</div>
+				<div className="graph-container__graph">
+					<h2>Количество машин на складе автосалона 2</h2>
+					<ResponsiveContainer width="100%" aspect={4.0 / 3.0}>
+						<LineChart
+							width={500}
+							height={500}
+							// @ts-ignore
+							data={dataForGraphNumberOfCarsInStorage2}
+							margin={{ top: 5, right: 20, bottom: 5, left: 0 }}
+						>
+							<Tooltip />
+							<Line
+								type="monotone"
+								dataKey="data"
+								stroke="#8884d8"
+								dot={true}
+							/>
+							<XAxis dataKey="day" />
+							<YAxis />
+						</LineChart>
+					</ResponsiveContainer>
+				</div>
+			</div>
+		</div>
 	);
 }
 
