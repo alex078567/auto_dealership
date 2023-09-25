@@ -383,6 +383,7 @@ function App() {
 	const [orderStrategy, setOrderStrategy] = useState(2);
 	const [hankoTransporterSize, setHankoTransporterSize] = useState(3);
 	const [moscowTransporterSize, setMoscowTransporterSize] = useState(3);
+	const [prepaymentSize, setPrepaymentSize] = useState(900);
 
 	useEffect(() => {}, []);
 	const onOptionChange = (
@@ -614,66 +615,53 @@ function App() {
 						<input
 							type="radio"
 							name="moscowTransporter"
-							value="2"
-							id="2"
-							checked={moscowTransporterSize === 2}
+							value="3"
+							id="3"
+							checked={moscowTransporterSize === 3}
 							onChange={(e) => {
 								onOptionChange(e, setMoscowTransporterSize);
 							}}
 						/>
-						<label htmlFor="2">2</label>
+						<label htmlFor="3">3</label>
 					</div>
 					<div className="radio-group__item">
 						<input
 							type="radio"
 							name="moscowTransporter"
-							value="4"
-							id="4"
-							checked={moscowTransporterSize === 4}
+							value="5"
+							id="5"
+							checked={moscowTransporterSize === 5}
 							onChange={(e) => {
 								onOptionChange(e, setMoscowTransporterSize);
 							}}
 						/>
-						<label htmlFor="4">4</label>
+						<label htmlFor="5">5</label>
 					</div>
 					<div className="radio-group__item">
 						<input
 							type="radio"
 							name="moscowTransporter"
-							value="6"
-							id="6"
-							checked={moscowTransporterSize === 6}
+							value="7"
+							id="7"
+							checked={moscowTransporterSize === 7}
 							onChange={(e) => {
 								onOptionChange(e, setMoscowTransporterSize);
 							}}
 						/>
-						<label htmlFor="6">6</label>
+						<label htmlFor="7">7</label>
 					</div>
 					<div className="radio-group__item">
 						<input
 							type="radio"
 							name="moscowTransporter"
-							value="8"
-							id="8"
-							checked={moscowTransporterSize === 8}
+							value="9"
+							id="9"
+							checked={moscowTransporterSize === 9}
 							onChange={(e) => {
 								onOptionChange(e, setMoscowTransporterSize);
 							}}
 						/>
-						<label htmlFor="8">8</label>
-					</div>
-					<div className="radio-group__item">
-						<input
-							type="radio"
-							name="moscowTransporter"
-							value="10"
-							id="10"
-							checked={moscowTransporterSize === 10}
-							onChange={(e) => {
-								onOptionChange(e, setMoscowTransporterSize);
-							}}
-						/>
-						<label htmlFor="10">10</label>
+						<label htmlFor="9">9</label>
 					</div>
 					<div className="radio-group__item">
 						<input
@@ -692,27 +680,189 @@ function App() {
 						<input
 							type="radio"
 							name="moscowTransporter"
-							value="16"
-							id="16"
-							checked={moscowTransporterSize === 16}
+							value="15"
+							id="15"
+							checked={moscowTransporterSize === 15}
 							onChange={(e) => {
 								onOptionChange(e, setMoscowTransporterSize);
 							}}
 						/>
-						<label htmlFor="16">16</label>
+						<label htmlFor="15">15</label>
 					</div>
 					<div className="radio-group__item">
 						<input
 							type="radio"
 							name="moscowTransporter"
-							value="20"
-							id="20"
-							checked={moscowTransporterSize === 20}
+							value="18"
+							id="18"
+							checked={moscowTransporterSize === 18}
 							onChange={(e) => {
 								onOptionChange(e, setMoscowTransporterSize);
 							}}
 						/>
-						<label htmlFor="20">20</label>
+						<label htmlFor="18">18</label>
+					</div>
+				</div>
+				<div className="radio-group">
+					<h3>Размер перевозчика из ханко</h3>
+					<div className="radio-group__item">
+						<input
+							type="radio"
+							name="hankoTransporter"
+							value="3"
+							id="3"
+							checked={hankoTransporterSize === 3}
+							onChange={(e) => {
+								onOptionChange(e, setHankoTransporterSize);
+							}}
+						/>
+						<label htmlFor="3">3</label>
+					</div>
+					<div className="radio-group__item">
+						<input
+							type="radio"
+							name="hankoTransporter"
+							value="5"
+							id="5"
+							checked={hankoTransporterSize === 5}
+							onChange={(e) => {
+								onOptionChange(e, setHankoTransporterSize);
+							}}
+						/>
+						<label htmlFor="5">5</label>
+					</div>
+					<div className="radio-group__item">
+						<input
+							type="radio"
+							name="hankoTransporter"
+							value="7"
+							id="7"
+							checked={hankoTransporterSize === 7}
+							onChange={(e) => {
+								onOptionChange(e, setHankoTransporterSize);
+							}}
+						/>
+						<label htmlFor="7">7</label>
+					</div>
+					<div className="radio-group__item">
+						<input
+							type="radio"
+							name="hankoTransporter"
+							value="9"
+							id="9"
+							checked={hankoTransporterSize === 9}
+							onChange={(e) => {
+								onOptionChange(e, setHankoTransporterSize);
+							}}
+						/>
+						<label htmlFor="9">9</label>
+					</div>
+					<div className="radio-group__item">
+						<input
+							type="radio"
+							name="hankoTransporter"
+							value="12"
+							id="12"
+							checked={hankoTransporterSize === 12}
+							onChange={(e) => {
+								onOptionChange(e, setHankoTransporterSize);
+							}}
+						/>
+						<label htmlFor="12">12</label>
+					</div>
+					<div className="radio-group__item">
+						<input
+							type="radio"
+							name="hankoTransporter"
+							value="15"
+							id="15"
+							checked={hankoTransporterSize === 15}
+							onChange={(e) => {
+								onOptionChange(e, setHankoTransporterSize);
+							}}
+						/>
+						<label htmlFor="15">15</label>
+					</div>
+					<div className="radio-group__item">
+						<input
+							type="radio"
+							name="hankoTransporter"
+							value="18"
+							id="18"
+							checked={hankoTransporterSize === 18}
+							onChange={(e) => {
+								onOptionChange(e, setHankoTransporterSize);
+							}}
+						/>
+						<label htmlFor="18">18</label>
+					</div>
+				</div>
+				<div className="radio-group">
+					<h3>Минимальный размер предоплаты</h3>
+					<div className="radio-group__item">
+						<input
+							type="radio"
+							name="minPrepayment"
+							value="900"
+							id="900"
+							checked={prepaymentSize === 900}
+							onChange={(e) => {
+								onOptionChange(e, setPrepaymentSize);
+							}}
+						/>
+						<label htmlFor="900">900 тыс.руб</label>
+					</div>
+					<div className="radio-group__item">
+						<input
+							type="radio"
+							name="minPrepayment"
+							value="20"
+							id="20"
+							checked={prepaymentSize === 20}
+							onChange={(e) => {
+								onOptionChange(e, setPrepaymentSize);
+							}}
+						/>
+						<label htmlFor="20">20%</label>
+					</div>
+					<div className="radio-group__item">
+						<input
+							type="radio"
+							name="minPrepayment"
+							value="40"
+							id="40"
+							checked={prepaymentSize === 40}
+							onChange={(e) => {
+								onOptionChange(e, setPrepaymentSize);
+							}}
+						/>
+						<label htmlFor="40">40%</label>
+					</div>
+					<div className="radio-group__item">
+						<input
+							type="radio"
+							name="minPrepayment"
+							value="60"
+							id="60"
+							checked={prepaymentSize === 60}
+							onChange={(e) => {
+								onOptionChange(e, setPrepaymentSize);
+							}}
+						/>
+						<label htmlFor="60">60%</label>
+					</div>
+					<div className="radio-group__item">
+						<input
+							type="radio"
+							name="minPrepayment"
+							value="80"
+							id="80"
+							checked={prepaymentSize === 80}
+							onChange={(e) => {
+								onOptionChange(e, setPrepaymentSize);
+							}}
+						/>
+						<label htmlFor="80">80%</label>
 					</div>
 				</div>
 			</div>
