@@ -65,6 +65,27 @@ const storageSelectorIfDealeshipStorageIsEmpty = () => {
 	}
 };
 
+const countPrepayment = (
+	prepaymentSize: string,
+	selectedCarPrice: number
+): number => {
+	switch (prepaymentSize) {
+		case '20':
+			return prepaymentGenerator(selectedCarPrice, selectedCarPrice * 0.2);
+		case '40':
+			return prepaymentGenerator(selectedCarPrice, selectedCarPrice * 0.4);
+		case '50':
+			return prepaymentGenerator(selectedCarPrice, selectedCarPrice * 0.5);
+		case '60':
+			return prepaymentGenerator(selectedCarPrice, selectedCarPrice * 0.6);
+		case '80':
+			return prepaymentGenerator(selectedCarPrice, selectedCarPrice * 0.8);
+
+		default:
+			return prepaymentGenerator(selectedCarPrice, 900000);
+	}
+};
+
 // Генерация предоплаты
 const prepaymentGenerator = (carPrice: number, minSum: number): number => {
 	const carPriceThousands = carPrice / 1000;
@@ -93,290 +114,327 @@ interface dataForGraphI {
 	data: number;
 	day: number;
 }
-let totalClients = 0;
-let dataForGraphProfit: dataForGraphI[] = [];
-let dataForGraphExpenses: dataForGraphI[] = [];
-let dataForGraphTotalProfit: dataForGraphI[] = [];
-let dataForGraphStorageMonthlyPaymentTotal: dataForGraphI[] = [];
-let dataForGraphNumberOfCarsInStorage1: dataForGraphI[] = [];
-let dataForGraphNumberOfCarsInStorage2: dataForGraphI[] = [];
-let totalSum = 0;
-let totalExpenses = -1000000;
-const STORAGE_MONTHLY_PAYMENT = 6000;
-const DAYS_IN_MONTH = 30;
-let orderId = 0;
-const hankoStorage = new HankoStorage(10, 15);
-const moscowStorage = new MoscowStorage(5, 5);
-const carDealership1 = new CarDealershipStorage(8, 3, 4);
-const carDealership2 = new CarDealershipStorage(8, 3, 4);
 
-let currentOrdersDealership1 = [];
-let currentOrdersDealership2 = [];
+const carDealershipModel = (
+	storageSize: number,
+	orderStrategy: number,
+	hankoTransporterSize: number,
+	moscowTransporterSize: number,
+	prepaymentSize: string,
+	numberOfIterations: number
+): {
+	dataForGraphProfit: dataForGraphI[];
+	dataForGraphExpenses: dataForGraphI[];
+	dataForGraphTotalProfit: dataForGraphI[];
+	dataForGraphStorageMonthlyPaymentTotal: dataForGraphI[];
+	dataForGraphNumberOfCarsInStorage1: dataForGraphI[];
+	dataForGraphNumberOfCarsInStorage2: dataForGraphI[];
+} => {
+	let totalClients = 0;
+	let dataForGraphProfit: dataForGraphI[] = [];
+	let dataForGraphExpenses: dataForGraphI[] = [];
+	let dataForGraphTotalProfit: dataForGraphI[] = [];
+	let dataForGraphStorageMonthlyPaymentTotal: dataForGraphI[] = [];
+	let dataForGraphNumberOfCarsInStorage1: dataForGraphI[] = [];
+	let dataForGraphNumberOfCarsInStorage2: dataForGraphI[] = [];
+	let totalSum = 0;
+	let totalExpenses = -1000000;
+	const STORAGE_MONTHLY_PAYMENT = 6000;
+	const DAYS_IN_MONTH = 30;
+	let orderId = 0;
+	const hankoStorage = new HankoStorage(12, hankoTransporterSize);
+	const moscowStorage = new MoscowStorage(12, moscowTransporterSize);
+	const carDealership1 = new CarDealershipStorage(
+		storageSize,
+		orderStrategy,
+		4
+	);
+	const carDealership2 = new CarDealershipStorage(
+		storageSize,
+		orderStrategy,
+		4
+	);
 
-//-------------------------------
-// Разгрузка погрузчиков, выдача заказов
-//-------------------------------
+	let currentOrdersDealership1 = [];
+	let currentOrdersDealership2 = [];
 
-for (let i = 0; i < 200; i++) {
 	//-------------------------------
-	// Генерация потенциальных клиентов
+	// Разгрузка погрузчиков, выдача заказов
 	//-------------------------------
-	const potentialClientsDealership1 = potentialClientGenerator(1, 10);
-	const potentialClientsDealership2 = potentialClientGenerator(1, 10);
-	console.log('potential clients');
-	console.log(potentialClientsDealership1);
-	console.log(potentialClientsDealership2);
 
-	//-------------------------------
-	// 10% становятся клиентами
-	//-------------------------------
-	const actualClientsDealership1 = managerFilter(potentialClientsDealership1);
-	const actualClientsDealership2 = managerFilter(potentialClientsDealership2);
-	console.log('real clients');
-	console.log(actualClientsDealership1);
-	console.log(actualClientsDealership2);
-	totalClients += actualClientsDealership1 + actualClientsDealership2;
-	//-------------------------------
-	// Генератор заявок для каждого клиента
-	//-------------------------------
-	for (let j = 0; j < actualClientsDealership1; j++) {
-		const selectedCarPrice = carSelector();
-		const selectedStorage = storageSelector();
-		const order = new ClientOrder(
-			orderId,
-			selectedCarPrice,
-			selectedStorage,
-			prepaymentGenerator(selectedCarPrice, selectedCarPrice / 2),
-			selectLastDayOfShipment(selectedStorage)
-		);
+	for (let i = 0; i < numberOfIterations; i++) {
+		//-------------------------------
+		// Генерация потенциальных клиентов
+		//-------------------------------
+		const potentialClientsDealership1 = potentialClientGenerator(1, 10);
+		const potentialClientsDealership2 = potentialClientGenerator(1, 10);
+		console.log('potential clients');
+		console.log(potentialClientsDealership1);
+		console.log(potentialClientsDealership2);
 
-		orderId++;
-		currentOrdersDealership1.push(order);
-	}
-	for (let k = 0; k < actualClientsDealership2; k++) {
-		const selectedCarPrice = carSelector();
-		const selectedStorage = storageSelector();
-		const order = new ClientOrder(
-			orderId,
-			selectedCarPrice,
-			selectedStorage,
-			prepaymentGenerator(selectedCarPrice, selectedCarPrice / 2),
-			selectLastDayOfShipment(selectedStorage)
-		);
+		//-------------------------------
+		// 10% становятся клиентами
+		//-------------------------------
+		const actualClientsDealership1 = managerFilter(potentialClientsDealership1);
+		const actualClientsDealership2 = managerFilter(potentialClientsDealership2);
+		console.log('real clients');
+		console.log(actualClientsDealership1);
+		console.log(actualClientsDealership2);
+		totalClients += actualClientsDealership1 + actualClientsDealership2;
+		//-------------------------------
+		// Генератор заявок для каждого клиента
+		//-------------------------------
+		for (let j = 0; j < actualClientsDealership1; j++) {
+			const selectedCarPrice = carSelector();
+			const selectedStorage = storageSelector();
 
-		orderId++;
-		currentOrdersDealership2.push(order);
-	}
-	console.log('current orders');
-	console.log(currentOrdersDealership1);
-	console.log(currentOrdersDealership2);
-	//-----------------------------
-	// обработка заявок
-	//-----------------------------
+			const order = new ClientOrder(
+				orderId,
+				selectedCarPrice,
+				selectedStorage,
+				countPrepayment(prepaymentSize, selectedCarPrice),
+				selectLastDayOfShipment(selectedStorage)
+			);
 
-	currentOrdersDealership1.forEach((order: ClientOrder) => {
-		const newOrder = order;
-		// если машина на складе автосалона
-		if (newOrder.storageId === 2 && carDealership2.numberOfCars == 0) {
-			newOrder.storageId = 1;
+			orderId++;
+			currentOrdersDealership1.push(order);
 		}
-		if (newOrder.storageId === 1 && carDealership1.numberOfCars == 0) {
-			newOrder.storageId = 2;
+		for (let k = 0; k < actualClientsDealership2; k++) {
+			const selectedCarPrice = carSelector();
+			const selectedStorage = storageSelector();
+			const order = new ClientOrder(
+				orderId,
+				selectedCarPrice,
+				selectedStorage,
+				countPrepayment(prepaymentSize, selectedCarPrice),
+				selectLastDayOfShipment(selectedStorage)
+			);
+
+			orderId++;
+			currentOrdersDealership2.push(order);
+		}
+		console.log('current orders');
+		console.log(currentOrdersDealership1);
+		console.log(currentOrdersDealership2);
+		//-----------------------------
+		// обработка заявок
+		//-----------------------------
+
+		currentOrdersDealership1.forEach((order: ClientOrder) => {
+			const newOrder = order;
+			// если машина на складе автосалона
 			if (newOrder.storageId === 2 && carDealership2.numberOfCars == 0) {
-				newOrder.storageId = storageSelectorIfDealeshipStorageIsEmpty();
+				newOrder.storageId = 1;
 			}
-		}
-
-		if (newOrder.storageId === 1) {
-			carDealership1.chooseRandomCar();
-			carDealership1.addToHankoQue(newOrder.priceOfCar);
-			totalSum += newOrder.priceOfCar;
-		}
-		// если в друом автосалоне
-		if (newOrder.storageId === 2) {
-			totalSum += newOrder.prepayment;
-			carDealership1.addNewOrder(newOrder);
-			carDealership2.chooseRandomCar();
-			carDealership2.carsToShipmentArray.push({
-				orderId: newOrder.orderId,
-			});
-			carDealership2.addToHankoQue(newOrder.priceOfCar);
-		}
-		// если на складе в Москве
-		if (newOrder.storageId === 3) {
-			console.log('storage 3');
-			totalSum += newOrder.prepayment;
-			totalExpenses += newOrder.priceOfCar * 0.9;
-			carDealership1.addNewOrder(newOrder);
-			moscowStorage.addCarToShipmentQueToDealership1({
-				orderId: newOrder.orderId,
-			});
-		}
-		// если на складе в Ханко
-		if (newOrder.storageId === 4) {
-			console.log('storage 4');
-			totalSum += newOrder.prepayment;
-			totalExpenses += newOrder.priceOfCar * 0.8;
-			carDealership1.addNewOrder(newOrder);
-			hankoStorage.addCarToMainQue({
-				isForDealership1: true,
-				orderId: newOrder.orderId,
-			});
-		}
-	});
-
-	currentOrdersDealership2.forEach((order: ClientOrder) => {
-		const newOrder = order;
-		// если машина на складе автосалона
-		if (newOrder.storageId === 1 && carDealership1.numberOfCars == 0) {
-			newOrder.storageId = 2;
-		}
-		if (newOrder.storageId === 2 && carDealership2.numberOfCars == 0) {
-			newOrder.storageId = 1;
 			if (newOrder.storageId === 1 && carDealership1.numberOfCars == 0) {
-				newOrder.storageId = storageSelectorIfDealeshipStorageIsEmpty();
+				newOrder.storageId = 2;
+				if (newOrder.storageId === 2 && carDealership2.numberOfCars == 0) {
+					newOrder.storageId = storageSelectorIfDealeshipStorageIsEmpty();
+				}
 			}
-		}
-		// если машина на складе автосалона
-		if (newOrder.storageId === 2) {
-			carDealership2.chooseRandomCar();
-			carDealership2.addToHankoQue(newOrder.priceOfCar);
-			totalSum += newOrder.priceOfCar;
-		}
-		// если в друом автосалоне
-		if (newOrder.storageId === 1) {
-			totalSum += newOrder.prepayment;
-			carDealership2.addNewOrder(newOrder);
-			carDealership1.chooseRandomCar();
-			carDealership1.carsToShipmentArray.push({
-				orderId: newOrder.orderId,
-			});
-			carDealership1.addToHankoQue(newOrder.priceOfCar);
-		}
-		// если на складе в Москве
-		if (newOrder.storageId === 3) {
-			totalSum += newOrder.prepayment;
-			totalExpenses += newOrder.priceOfCar * 0.9;
-			carDealership2.addNewOrder(newOrder);
-			moscowStorage.addCarToShipmentQueToDealership2({
-				orderId: newOrder.orderId,
-			});
-		}
-		// если на складе в Ханко
-		if (newOrder.storageId === 4) {
-			totalSum += newOrder.prepayment;
-			totalExpenses += newOrder.priceOfCar * 0.8;
-			carDealership2.addNewOrder(newOrder);
-			hankoStorage.addCarToMainQue({
-				isForDealership1: false,
-				orderId: newOrder.orderId,
-			});
-		}
-	});
 
-	console.log('carDealership1', carDealership1);
-	console.log('carDealership2', carDealership2);
-	console.log('carDealership1', carDealership1.clientOrdersArray);
-	console.log('carDealership2', carDealership2.clientOrdersArray);
-	currentOrdersDealership1 = [];
-	currentOrdersDealership2 = [];
-	//----------------------------
-	// Заказ в Ханко для пополнения склада
-	//----------------------------
-	carDealership1.timeToOrderFromHanko(true, hankoStorage);
-	carDealership2.timeToOrderFromHanko(false, hankoStorage);
-	//----------------------------
-	// Пришла ли доставка
-	//----------------------------
-	if (hankoStorage.checkIfShipmentArrives()) {
-		moscowStorage.shipmentFromHanko(hankoStorage.shipmentQue);
-		hankoStorage.unloadCargo();
-	}
-	if (moscowStorage.checkIfShipmentArrives1()) {
-		carDealership1.unloadCarShipment(
-			moscowStorage.carsOnTransporterToDealership1Array
-		);
-		moscowStorage.unloadCargo1();
-	}
-	if (moscowStorage.checkIfShipmentArrives2()) {
-		carDealership2.unloadCarShipment(
-			moscowStorage.carsOnTransporterToDealership2Array
-		);
-		moscowStorage.unloadCargo2();
-	}
-	if (carDealership1.checkIfShipmentArrives()) {
-		carDealership2.unloadCarShipment([carDealership1.carsToShipmentArray[0]]);
-		carDealership1.unloadCargo();
-	}
-	if (carDealership2.checkIfShipmentArrives()) {
-		carDealership1.unloadCarShipment([carDealership2.carsToShipmentArray[0]]);
-		carDealership2.unloadCargo();
-	}
+			if (newOrder.storageId === 1) {
+				carDealership1.chooseRandomCar();
+				carDealership1.addToHankoQue(newOrder.priceOfCar);
+				totalSum += newOrder.priceOfCar;
+			}
+			// если в друом автосалоне
+			if (newOrder.storageId === 2) {
+				totalSum += newOrder.prepayment;
+				carDealership1.addNewOrder(newOrder);
+				carDealership2.chooseRandomCar();
+				carDealership2.carsToShipmentArray.push({
+					orderId: newOrder.orderId,
+				});
+				carDealership2.addToHankoQue(newOrder.priceOfCar);
+			}
+			// если на складе в Москве
+			if (newOrder.storageId === 3) {
+				console.log('storage 3');
+				totalSum += newOrder.prepayment;
+				totalExpenses += newOrder.priceOfCar * 0.9;
+				carDealership1.addNewOrder(newOrder);
+				moscowStorage.addCarToShipmentQueToDealership1({
+					orderId: newOrder.orderId,
+				});
+			}
+			// если на складе в Ханко
+			if (newOrder.storageId === 4) {
+				console.log('storage 4');
+				totalSum += newOrder.prepayment;
+				totalExpenses += newOrder.priceOfCar * 0.8;
+				carDealership1.addNewOrder(newOrder);
+				hankoStorage.addCarToMainQue({
+					isForDealership1: true,
+					orderId: newOrder.orderId,
+				});
+			}
+		});
 
-	//----------------------------
-	// Работа погрузчиков
-	//----------------------------
-	carDealership1.isSendCarTransporter();
-	carDealership2.isSendCarTransporter();
-	hankoStorage.isSendCarTransporter();
-	moscowStorage.isSendCarTransporter();
+		currentOrdersDealership2.forEach((order: ClientOrder) => {
+			const newOrder = order;
+			// если машина на складе автосалона
+			if (newOrder.storageId === 1 && carDealership1.numberOfCars == 0) {
+				newOrder.storageId = 2;
+			}
+			if (newOrder.storageId === 2 && carDealership2.numberOfCars == 0) {
+				newOrder.storageId = 1;
+				if (newOrder.storageId === 1 && carDealership1.numberOfCars == 0) {
+					newOrder.storageId = storageSelectorIfDealeshipStorageIsEmpty();
+				}
+			}
+			// если машина на складе автосалона
+			if (newOrder.storageId === 2) {
+				carDealership2.chooseRandomCar();
+				carDealership2.addToHankoQue(newOrder.priceOfCar);
+				totalSum += newOrder.priceOfCar;
+			}
+			// если в друом автосалоне
+			if (newOrder.storageId === 1) {
+				totalSum += newOrder.prepayment;
+				carDealership2.addNewOrder(newOrder);
+				carDealership1.chooseRandomCar();
+				carDealership1.carsToShipmentArray.push({
+					orderId: newOrder.orderId,
+				});
+				carDealership1.addToHankoQue(newOrder.priceOfCar);
+			}
+			// если на складе в Москве
+			if (newOrder.storageId === 3) {
+				totalSum += newOrder.prepayment;
+				totalExpenses += newOrder.priceOfCar * 0.9;
+				carDealership2.addNewOrder(newOrder);
+				moscowStorage.addCarToShipmentQueToDealership2({
+					orderId: newOrder.orderId,
+				});
+			}
+			// если на складе в Ханко
+			if (newOrder.storageId === 4) {
+				totalSum += newOrder.prepayment;
+				totalExpenses += newOrder.priceOfCar * 0.8;
+				carDealership2.addNewOrder(newOrder);
+				hankoStorage.addCarToMainQue({
+					isForDealership1: false,
+					orderId: newOrder.orderId,
+				});
+			}
+		});
 
-	//----------------------------
-	// Прошел ещё один день
-	//----------------------------
-	hankoStorage.anotherDayPasses();
-	moscowStorage.anotherDayPasses();
-	carDealership1.anotherDayPasses();
-	carDealership2.anotherDayPasses();
+		console.log('carDealership1', carDealership1);
+		console.log('carDealership2', carDealership2);
+		console.log('carDealership1', carDealership1.clientOrdersArray);
+		console.log('carDealership2', carDealership2.clientOrdersArray);
+		currentOrdersDealership1 = [];
+		currentOrdersDealership2 = [];
+		//----------------------------
+		// Заказ в Ханко для пополнения склада
+		//----------------------------
+		carDealership1.timeToOrderFromHanko(true, hankoStorage);
+		carDealership2.timeToOrderFromHanko(false, hankoStorage);
+		//----------------------------
+		// Пришла ли доставка
+		//----------------------------
+		if (hankoStorage.checkIfShipmentArrives()) {
+			moscowStorage.shipmentFromHanko(hankoStorage.shipmentQue);
+			hankoStorage.unloadCargo();
+		}
+		if (moscowStorage.checkIfShipmentArrives1()) {
+			carDealership1.unloadCarShipment(
+				moscowStorage.carsOnTransporterToDealership1Array
+			);
+			moscowStorage.unloadCargo1();
+		}
+		if (moscowStorage.checkIfShipmentArrives2()) {
+			carDealership2.unloadCarShipment(
+				moscowStorage.carsOnTransporterToDealership2Array
+			);
+			moscowStorage.unloadCargo2();
+		}
+		if (carDealership1.checkIfShipmentArrives()) {
+			carDealership2.unloadCarShipment([carDealership1.carsToShipmentArray[0]]);
+			carDealership1.unloadCargo();
+		}
+		if (carDealership2.checkIfShipmentArrives()) {
+			carDealership1.unloadCarShipment([carDealership2.carsToShipmentArray[0]]);
+			carDealership2.unloadCargo();
+		}
 
-	//----------------------------
-	// Оплата за хранение машин на складе
-	//----------------------------
-	carDealership1.storageRentPayment();
-	carDealership2.storageRentPayment();
-	//----------------------------
-	// Прибавляем доходы и расходы салонов к общим
-	//----------------------------
-	totalExpenses += carDealership1.totalExpenses + carDealership2.totalExpenses;
-	carDealership1.totalExpenses = 0;
-	carDealership2.totalExpenses = 0;
-	totalSum += carDealership1.totalProfit + carDealership2.totalProfit;
-	carDealership1.totalProfit = 0;
-	carDealership2.totalProfit = 0;
-	dataForGraphProfit.push({
-		data: totalSum,
-		day: i,
-	});
-	dataForGraphExpenses.push({
-		data: totalExpenses,
-		day: i,
-	});
-	dataForGraphTotalProfit.push({
-		data: totalSum - totalExpenses,
-		day: i,
-	});
-	dataForGraphStorageMonthlyPaymentTotal.push({
-		data:
-			carDealership1.storageMonthlyPaymentTotal +
-			carDealership2.storageMonthlyPaymentTotal,
-		day: i,
-	});
-	dataForGraphNumberOfCarsInStorage1.push({
-		data: carDealership1.numberOfCars,
-		day: i,
-	});
-	dataForGraphNumberOfCarsInStorage2.push({
-		data: carDealership2.numberOfCars,
-		day: i,
-	});
-	console.log(moscowStorage);
-	console.log(hankoStorage);
-	console.log(totalExpenses);
-	console.log(totalSum);
-	console.log(carDealership1.averageDeliveryTime);
-	console.log(carDealership2.averageDeliveryTime);
-	console.log(totalClients);
-}
+		//----------------------------
+		// Работа погрузчиков
+		//----------------------------
+		carDealership1.isSendCarTransporter();
+		carDealership2.isSendCarTransporter();
+		hankoStorage.isSendCarTransporter();
+		moscowStorage.isSendCarTransporter();
+
+		//----------------------------
+		// Прошел ещё один день
+		//----------------------------
+		hankoStorage.anotherDayPasses();
+		moscowStorage.anotherDayPasses();
+		carDealership1.anotherDayPasses();
+		carDealership2.anotherDayPasses();
+
+		//----------------------------
+		// Оплата за хранение машин на складе
+		//----------------------------
+		carDealership1.storageRentPayment();
+		carDealership2.storageRentPayment();
+		//----------------------------
+		// Прибавляем доходы и расходы салонов к общим
+		//----------------------------
+		totalExpenses +=
+			carDealership1.totalExpenses + carDealership2.totalExpenses;
+		carDealership1.totalExpenses = 0;
+		carDealership2.totalExpenses = 0;
+		totalSum += carDealership1.totalProfit + carDealership2.totalProfit;
+		carDealership1.totalProfit = 0;
+		carDealership2.totalProfit = 0;
+		// Данные для графиков
+		dataForGraphProfit.push({
+			data: totalSum,
+			day: i,
+		});
+		dataForGraphExpenses.push({
+			data: totalExpenses,
+			day: i,
+		});
+		dataForGraphTotalProfit.push({
+			data: totalSum - totalExpenses,
+			day: i,
+		});
+		dataForGraphStorageMonthlyPaymentTotal.push({
+			data:
+				carDealership1.storageMonthlyPaymentTotal +
+				carDealership2.storageMonthlyPaymentTotal,
+			day: i,
+		});
+		dataForGraphNumberOfCarsInStorage1.push({
+			data: carDealership1.numberOfCars,
+			day: i,
+		});
+		dataForGraphNumberOfCarsInStorage2.push({
+			data: carDealership2.numberOfCars,
+			day: i,
+		});
+
+		console.log(moscowStorage);
+		console.log(hankoStorage);
+		console.log(totalExpenses);
+		console.log(totalSum);
+		console.log(carDealership1.averageDeliveryTime);
+		console.log(carDealership2.averageDeliveryTime);
+		console.log(totalClients);
+	}
+	return {
+		dataForGraphProfit,
+		dataForGraphExpenses,
+		dataForGraphTotalProfit,
+		dataForGraphStorageMonthlyPaymentTotal,
+		dataForGraphNumberOfCarsInStorage1,
+		dataForGraphNumberOfCarsInStorage2,
+	};
+};
 
 function App() {
 	const [storageSize, setStorageSize] = useState(2);
@@ -384,7 +442,7 @@ function App() {
 	const [hankoTransporterSize, setHankoTransporterSize] = useState(3);
 	const [moscowTransporterSize, setMoscowTransporterSize] = useState(3);
 	const [prepaymentSize, setPrepaymentSize] = useState(900);
-
+	const [refresh, setRefresh] = useState(true);
 	useEffect(() => {}, []);
 	const onOptionChange = (
 		e: React.ChangeEvent<HTMLInputElement>,
@@ -392,6 +450,22 @@ function App() {
 	) => {
 		setter(+e.target.value);
 	};
+	const {
+		dataForGraphProfit,
+		dataForGraphExpenses,
+		dataForGraphTotalProfit,
+		dataForGraphStorageMonthlyPaymentTotal,
+		dataForGraphNumberOfCarsInStorage1,
+		dataForGraphNumberOfCarsInStorage2,
+	} = carDealershipModel(
+		storageSize,
+		orderStrategy,
+		hankoTransporterSize,
+		moscowTransporterSize,
+		`${prepaymentSize}`,
+		200
+	);
+
 	return (
 		<div className="main-container">
 			<div className="control-container">
@@ -842,6 +916,19 @@ function App() {
 						<input
 							type="radio"
 							name="minPrepayment"
+							value="50"
+							id="50"
+							checked={prepaymentSize === 50}
+							onChange={(e) => {
+								onOptionChange(e, setPrepaymentSize);
+							}}
+						/>
+						<label htmlFor="50">50%</label>
+					</div>
+					<div className="radio-group__item">
+						<input
+							type="radio"
+							name="minPrepayment"
 							value="60"
 							id="60"
 							checked={prepaymentSize === 60}
@@ -864,6 +951,14 @@ function App() {
 						/>
 						<label htmlFor="80">80%</label>
 					</div>
+				</div>
+				<div className="radio-group">
+					<button
+						className="refresh-button"
+						onClick={() => setRefresh(!refresh)}
+					>
+						перестроить графики
+					</button>
 				</div>
 			</div>
 			<div className="graph-container">
