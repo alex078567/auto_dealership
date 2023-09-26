@@ -121,7 +121,9 @@ const carDealershipModel = (
 	hankoTransporterSize: number,
 	moscowTransporterSize: number,
 	prepaymentSize: string,
-	numberOfIterations: number
+	numberOfIterations: number,
+	timeFromMoscow: number,
+	timeFromHanko: number
 ): {
 	dataForGraphProfit: dataForGraphI[];
 	dataForGraphExpenses: dataForGraphI[];
@@ -129,6 +131,7 @@ const carDealershipModel = (
 	dataForGraphStorageMonthlyPaymentTotal: dataForGraphI[];
 	dataForGraphNumberOfCarsInStorage1: dataForGraphI[];
 	dataForGraphNumberOfCarsInStorage2: dataForGraphI[];
+	dataForGraphAverageDeliveryTime: dataForGraphI[];
 } => {
 	let totalClients = 0;
 	let dataForGraphProfit: dataForGraphI[] = [];
@@ -137,13 +140,18 @@ const carDealershipModel = (
 	let dataForGraphStorageMonthlyPaymentTotal: dataForGraphI[] = [];
 	let dataForGraphNumberOfCarsInStorage1: dataForGraphI[] = [];
 	let dataForGraphNumberOfCarsInStorage2: dataForGraphI[] = [];
+	let dataForGraphAverageDeliveryTime: dataForGraphI[] = [];
+	let totalAverageDeliveryTime = 0;
 	let totalSum = 0;
-	let totalExpenses = -1000000;
+	let totalExpenses = 0;
 	const STORAGE_MONTHLY_PAYMENT = 6000;
 	const DAYS_IN_MONTH = 30;
 	let orderId = 0;
-	const hankoStorage = new HankoStorage(12, hankoTransporterSize);
-	const moscowStorage = new MoscowStorage(12, moscowTransporterSize);
+	const hankoStorage = new HankoStorage(timeFromHanko, hankoTransporterSize);
+	const moscowStorage = new MoscowStorage(
+		timeFromMoscow,
+		moscowTransporterSize
+	);
 	const carDealership1 = new CarDealershipStorage(
 		storageSize,
 		orderStrategy,
@@ -163,6 +171,7 @@ const carDealershipModel = (
 	//-------------------------------
 
 	for (let i = 0; i < numberOfIterations; i++) {
+		totalAverageDeliveryTime = 0;
 		//-------------------------------
 		// Генерация потенциальных клиентов
 		//-------------------------------
@@ -390,6 +399,10 @@ const carDealershipModel = (
 		totalSum += carDealership1.totalProfit + carDealership2.totalProfit;
 		carDealership1.totalProfit = 0;
 		carDealership2.totalProfit = 0;
+		totalAverageDeliveryTime =
+			(carDealership1.averageDeliveryTime +
+				carDealership2.averageDeliveryTime) /
+			2;
 		// Данные для графиков
 		dataForGraphProfit.push({
 			data: totalSum,
@@ -417,6 +430,10 @@ const carDealershipModel = (
 			data: carDealership2.numberOfCars,
 			day: i,
 		});
+		dataForGraphAverageDeliveryTime.push({
+			data: totalAverageDeliveryTime,
+			day: i,
+		});
 
 		console.log(moscowStorage);
 		console.log(hankoStorage);
@@ -433,6 +450,7 @@ const carDealershipModel = (
 		dataForGraphStorageMonthlyPaymentTotal,
 		dataForGraphNumberOfCarsInStorage1,
 		dataForGraphNumberOfCarsInStorage2,
+		dataForGraphAverageDeliveryTime,
 	};
 };
 
@@ -443,6 +461,8 @@ function App() {
 	const [moscowTransporterSize, setMoscowTransporterSize] = useState(3);
 	const [prepaymentSize, setPrepaymentSize] = useState(900);
 	const [refresh, setRefresh] = useState(true);
+	const [timeFromMoscow, setTimeFromMoscow] = useState(60);
+	const [timeFromHanko, setTimeFromHanko] = useState(60);
 	useEffect(() => {}, []);
 	const onOptionChange = (
 		e: React.ChangeEvent<HTMLInputElement>,
@@ -457,13 +477,16 @@ function App() {
 		dataForGraphStorageMonthlyPaymentTotal,
 		dataForGraphNumberOfCarsInStorage1,
 		dataForGraphNumberOfCarsInStorage2,
+		dataForGraphAverageDeliveryTime,
 	} = carDealershipModel(
 		storageSize,
 		orderStrategy,
 		hankoTransporterSize,
 		moscowTransporterSize,
 		`${prepaymentSize}`,
-		200
+		200,
+		timeFromMoscow,
+		timeFromHanko
 	);
 
 	return (
@@ -952,6 +975,169 @@ function App() {
 						<label htmlFor="80">80%</label>
 					</div>
 				</div>
+
+				<div className="radio-group">
+					<h3>Время доставки из Москвы</h3>
+					<div className="radio-group__item">
+						<input
+							type="radio"
+							name="deliveryTimeFromMoscow"
+							value="3"
+							id="3"
+							checked={timeFromMoscow === 3}
+							onChange={(e) => {
+								onOptionChange(e, setTimeFromMoscow);
+							}}
+						/>
+						<label htmlFor="3">3</label>
+					</div>
+					<div className="radio-group__item">
+						<input
+							type="radio"
+							name="deliveryTimeFromMoscow"
+							value="5"
+							id="5"
+							checked={timeFromMoscow === 5}
+							onChange={(e) => {
+								onOptionChange(e, setTimeFromMoscow);
+							}}
+						/>
+						<label htmlFor="5">5</label>
+					</div>
+					<div className="radio-group__item">
+						<input
+							type="radio"
+							name="deliveryTimeFromMoscow"
+							value="7"
+							id="7"
+							checked={timeFromMoscow === 7}
+							onChange={(e) => {
+								onOptionChange(e, setTimeFromMoscow);
+							}}
+						/>
+						<label htmlFor="7">7</label>
+					</div>
+					<div className="radio-group__item">
+						<input
+							type="radio"
+							name="deliveryTimeFromMoscow"
+							value="9"
+							id="9"
+							checked={timeFromMoscow === 9}
+							onChange={(e) => {
+								onOptionChange(e, setTimeFromMoscow);
+							}}
+						/>
+						<label htmlFor="9">9</label>
+					</div>
+					<div className="radio-group__item">
+						<input
+							type="radio"
+							name="deliveryTimeFromMoscow"
+							value="11"
+							id="11"
+							checked={timeFromMoscow === 11}
+							onChange={(e) => {
+								onOptionChange(e, setTimeFromMoscow);
+							}}
+						/>
+						<label htmlFor="11">11</label>
+					</div>
+					<div className="radio-group__item">
+						<input
+							type="radio"
+							name="deliveryTimeFromMoscow"
+							value="13"
+							id="13"
+							checked={timeFromMoscow === 13}
+							onChange={(e) => {
+								onOptionChange(e, setTimeFromMoscow);
+							}}
+						/>
+						<label htmlFor="13">13</label>
+					</div>
+				</div>
+				<div className="radio-group">
+					<h3>Время доставки из Ханко</h3>
+					<div className="radio-group__item">
+						<input
+							type="radio"
+							name="deliveryTimeFromHanko"
+							value="3"
+							id="3"
+							checked={timeFromHanko === 3}
+							onChange={(e) => {
+								onOptionChange(e, setTimeFromHanko);
+							}}
+						/>
+						<label htmlFor="3">3</label>
+					</div>
+					<div className="radio-group__item">
+						<input
+							type="radio"
+							name="deliveryTimeFromHanko"
+							value="5"
+							id="5"
+							checked={timeFromHanko === 5}
+							onChange={(e) => {
+								onOptionChange(e, setTimeFromHanko);
+							}}
+						/>
+						<label htmlFor="5">5</label>
+					</div>
+					<div className="radio-group__item">
+						<input
+							type="radio"
+							name="deliveryTimeFromHanko"
+							value="7"
+							id="7"
+							checked={timeFromHanko === 7}
+							onChange={(e) => {
+								onOptionChange(e, setTimeFromHanko);
+							}}
+						/>
+						<label htmlFor="7">7</label>
+					</div>
+					<div className="radio-group__item">
+						<input
+							type="radio"
+							name="deliveryTimeFromHanko"
+							value="9"
+							id="9"
+							checked={timeFromHanko === 9}
+							onChange={(e) => {
+								onOptionChange(e, setTimeFromHanko);
+							}}
+						/>
+						<label htmlFor="9">9</label>
+					</div>
+					<div className="radio-group__item">
+						<input
+							type="radio"
+							name="deliveryTimeFromHanko"
+							value="11"
+							id="11"
+							checked={timeFromHanko === 11}
+							onChange={(e) => {
+								onOptionChange(e, setTimeFromHanko);
+							}}
+						/>
+						<label htmlFor="11">11</label>
+					</div>
+					<div className="radio-group__item">
+						<input
+							type="radio"
+							name="deliveryTimeFromHanko"
+							value="13"
+							id="13"
+							checked={timeFromHanko === 13}
+							onChange={(e) => {
+								onOptionChange(e, setTimeFromHanko);
+							}}
+						/>
+						<label htmlFor="13">13</label>
+					</div>
+				</div>
 				<div className="radio-group">
 					<button
 						className="refresh-button"
@@ -1079,6 +1265,28 @@ function App() {
 							height={500}
 							// @ts-ignore
 							data={dataForGraphNumberOfCarsInStorage2}
+							margin={{ top: 5, right: 20, bottom: 5, left: 0 }}
+						>
+							<Tooltip />
+							<Line
+								type="monotone"
+								dataKey="data"
+								stroke="#8884d8"
+								dot={true}
+							/>
+							<XAxis dataKey="day" />
+							<YAxis />
+						</LineChart>
+					</ResponsiveContainer>
+				</div>
+				<div className="graph-container__graph">
+					<h2>Среднее время доставки</h2>
+					<ResponsiveContainer width="100%" aspect={4.0 / 3.0}>
+						<LineChart
+							width={500}
+							height={500}
+							// @ts-ignore
+							data={dataForGraphAverageDeliveryTime}
 							margin={{ top: 5, right: 20, bottom: 5, left: 0 }}
 						>
 							<Tooltip />
