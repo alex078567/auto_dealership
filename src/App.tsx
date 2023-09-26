@@ -132,6 +132,7 @@ const carDealershipModel = (
 	dataForGraphNumberOfCarsInStorage1: dataForGraphI[];
 	dataForGraphNumberOfCarsInStorage2: dataForGraphI[];
 	dataForGraphAverageDeliveryTime: dataForGraphI[];
+	dataForGraphWorkingCapital: dataForGraphI[];
 } => {
 	let totalClients = 0;
 	let dataForGraphProfit: dataForGraphI[] = [];
@@ -141,6 +142,7 @@ const carDealershipModel = (
 	let dataForGraphNumberOfCarsInStorage1: dataForGraphI[] = [];
 	let dataForGraphNumberOfCarsInStorage2: dataForGraphI[] = [];
 	let dataForGraphAverageDeliveryTime: dataForGraphI[] = [];
+	let dataForGraphWorkingCapital: dataForGraphI[] = [];
 	let totalAverageDeliveryTime = 0;
 	let totalSum = 0;
 	let totalExpenses = 0;
@@ -403,6 +405,7 @@ const carDealershipModel = (
 			(carDealership1.averageDeliveryTime +
 				carDealership2.averageDeliveryTime) /
 			2;
+		const totalProfit = totalSum - totalExpenses;
 		// Данные для графиков
 		dataForGraphProfit.push({
 			data: totalSum,
@@ -413,7 +416,7 @@ const carDealershipModel = (
 			day: i,
 		});
 		dataForGraphTotalProfit.push({
-			data: totalSum - totalExpenses,
+			data: totalProfit,
 			day: i,
 		});
 		dataForGraphStorageMonthlyPaymentTotal.push({
@@ -434,6 +437,10 @@ const carDealershipModel = (
 			data: totalAverageDeliveryTime,
 			day: i,
 		});
+		dataForGraphWorkingCapital.push({
+			data: totalProfit < 0 ? -totalProfit : 0,
+			day: i,
+		});
 
 		console.log(moscowStorage);
 		console.log(hankoStorage);
@@ -451,6 +458,7 @@ const carDealershipModel = (
 		dataForGraphNumberOfCarsInStorage1,
 		dataForGraphNumberOfCarsInStorage2,
 		dataForGraphAverageDeliveryTime,
+		dataForGraphWorkingCapital,
 	};
 };
 
@@ -461,8 +469,8 @@ function App() {
 	const [moscowTransporterSize, setMoscowTransporterSize] = useState(3);
 	const [prepaymentSize, setPrepaymentSize] = useState(900);
 	const [refresh, setRefresh] = useState(true);
-	const [timeFromMoscow, setTimeFromMoscow] = useState(60);
-	const [timeFromHanko, setTimeFromHanko] = useState(60);
+	const [timeFromMoscow, setTimeFromMoscow] = useState(5);
+	const [timeFromHanko, setTimeFromHanko] = useState(5);
 	useEffect(() => {}, []);
 	const onOptionChange = (
 		e: React.ChangeEvent<HTMLInputElement>,
@@ -478,6 +486,7 @@ function App() {
 		dataForGraphNumberOfCarsInStorage1,
 		dataForGraphNumberOfCarsInStorage2,
 		dataForGraphAverageDeliveryTime,
+		dataForGraphWorkingCapital,
 	} = carDealershipModel(
 		storageSize,
 		orderStrategy,
@@ -1287,6 +1296,28 @@ function App() {
 							height={500}
 							// @ts-ignore
 							data={dataForGraphAverageDeliveryTime}
+							margin={{ top: 5, right: 20, bottom: 5, left: 0 }}
+						>
+							<Tooltip />
+							<Line
+								type="monotone"
+								dataKey="data"
+								stroke="#8884d8"
+								dot={true}
+							/>
+							<XAxis dataKey="day" />
+							<YAxis />
+						</LineChart>
+					</ResponsiveContainer>
+				</div>
+				<div className="graph-container__graph">
+					<h2>Обьем оборотных средств для расчета</h2>
+					<ResponsiveContainer width="100%" aspect={4.0 / 3.0}>
+						<LineChart
+							width={500}
+							height={500}
+							// @ts-ignore
+							data={dataForGraphWorkingCapital}
 							margin={{ top: 5, right: 20, bottom: 5, left: 0 }}
 						>
 							<Tooltip />
