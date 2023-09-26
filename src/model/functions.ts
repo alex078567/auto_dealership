@@ -7,9 +7,9 @@ export enum pricesOfCars {
 }
 // Крайний срок поставки
 export enum lastDaysOfShipment {
-	Dealership = 10,
-	MoscowStorage = 30,
-	Factory = 90,
+	Dealership = 6,
+	MoscowStorage = 15,
+	Factory = 45,
 }
 // Случайное число между (включительно)
 export const getRandomNumberBetween = (min: number, max: number): number => {
@@ -69,7 +69,7 @@ export class ClientOrder {
 	countTheTotalPostpaymentSum() {
 		const differenceBetweenDays = this.daysOfShipment - this.lastDayForShipment;
 		if (differenceBetweenDays > 0) {
-			return this.postpayment - differenceBetweenDays * 0.001 * this.priceOfCar;
+			return this.postpayment - differenceBetweenDays * 0.01 * this.priceOfCar;
 		}
 		return this.postpayment;
 	}
@@ -185,6 +185,9 @@ export class CarDealershipStorage {
 	}
 	public unloadCarShipment(cars: carsToShipmentI[]) {
 		let newClientOrders = this.clientOrdersArray;
+		let allCarsToStorage = cars.filter((car) => {
+			return car.orderId === -10;
+		}).length;
 		cars.forEach((car) => {
 			if (car.orderId !== -10) {
 				newClientOrders = newClientOrders.filter((clientOrder) => {
@@ -202,17 +205,11 @@ export class CarDealershipStorage {
 				});
 				this.clientOrdersArray = newClientOrders;
 			} else {
-				let filteredArray = cars.filter((car) => {
-					return car.orderId === -10;
-				}).length;
-				let allCarsToStorage = cars.filter((car) => {
-					return car.orderId === -10;
-				}).length;
 				this.numberOfDaysInStorage = this.numberOfDaysInStorage.map(
 					(numberOfDays) => {
 						if (
 							numberOfDays.daysBeforeShipment === -1 &&
-							allCarsToStorage !== 0
+							allCarsToStorage > 0
 						) {
 							allCarsToStorage--;
 							this.numberOfCars++;

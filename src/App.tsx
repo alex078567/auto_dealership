@@ -135,14 +135,20 @@ const carDealershipModel = (
 	dataForGraphWorkingCapital: dataForGraphI[];
 } => {
 	let totalClients = 0;
-	let dataForGraphProfit: dataForGraphI[] = [];
-	let dataForGraphExpenses: dataForGraphI[] = [];
-	let dataForGraphTotalProfit: dataForGraphI[] = [];
-	let dataForGraphStorageMonthlyPaymentTotal: dataForGraphI[] = [];
-	let dataForGraphNumberOfCarsInStorage1: dataForGraphI[] = [];
-	let dataForGraphNumberOfCarsInStorage2: dataForGraphI[] = [];
-	let dataForGraphAverageDeliveryTime: dataForGraphI[] = [];
-	let dataForGraphWorkingCapital: dataForGraphI[] = [];
+	let dataForGraphProfit: dataForGraphI[] = [{ data: 0, day: 0 }];
+	let dataForGraphExpenses: dataForGraphI[] = [{ data: 0, day: 0 }];
+	let dataForGraphTotalProfit: dataForGraphI[] = [{ data: 0, day: 0 }];
+	let dataForGraphStorageMonthlyPaymentTotal: dataForGraphI[] = [
+		{ data: 0, day: 0 },
+	];
+	let dataForGraphNumberOfCarsInStorage1: dataForGraphI[] = [
+		{ data: 0, day: 0 },
+	];
+	let dataForGraphNumberOfCarsInStorage2: dataForGraphI[] = [
+		{ data: 0, day: 0 },
+	];
+	let dataForGraphAverageDeliveryTime: dataForGraphI[] = [{ data: 0, day: 0 }];
+	let dataForGraphWorkingCapital: dataForGraphI[] = [{ data: 0, day: 0 }];
 	let totalAverageDeliveryTime = 0;
 	let totalSum = 0;
 	let totalExpenses = 0;
@@ -172,7 +178,7 @@ const carDealershipModel = (
 	// Разгрузка погрузчиков, выдача заказов
 	//-------------------------------
 
-	for (let i = 0; i < numberOfIterations; i++) {
+	for (let i = 1; i < numberOfIterations; i++) {
 		totalAverageDeliveryTime = 0;
 		//-------------------------------
 		// Генерация потенциальных клиентов
@@ -210,7 +216,7 @@ const carDealershipModel = (
 			orderId++;
 			currentOrdersDealership1.push(order);
 		}
-		for (let k = 0; k < actualClientsDealership2; k++) {
+		for (let k = 1; k < actualClientsDealership2; k++) {
 			const selectedCarPrice = carSelector();
 			const selectedStorage = storageSelector();
 			const order = new ClientOrder(
@@ -463,8 +469,8 @@ const carDealershipModel = (
 };
 
 function App() {
-	const [storageSize, setStorageSize] = useState(2);
-	const [orderStrategy, setOrderStrategy] = useState(2);
+	const [storageSize, setStorageSize] = useState(6);
+	const [orderStrategy, setOrderStrategy] = useState(6);
 	const [hankoTransporterSize, setHankoTransporterSize] = useState(3);
 	const [moscowTransporterSize, setMoscowTransporterSize] = useState(3);
 	const [prepaymentSize, setPrepaymentSize] = useState(900);
