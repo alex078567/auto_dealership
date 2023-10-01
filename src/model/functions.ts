@@ -5,20 +5,24 @@ export enum pricesOfCars {
 	Outback = 3500000,
 	Forester = 3000000,
 }
+
 // Крайний срок поставки
 export enum lastDaysOfShipment {
 	Dealership = 6,
 	MoscowStorage = 15,
 	Factory = 45,
 }
+
 // Случайное число между (включительно)
 export const getRandomNumberBetween = (min: number, max: number): number => {
 	return Math.floor(Math.random() * (max + 1 - min) + min);
 };
+
 // Генерация потенциальных клиентов
 export const potentialClientGenerator = (min: number, max: number): number => {
 	return getRandomNumberBetween(min, max);
 };
+
 // Потенциальный клиент становится клиентом с вероятностью 10%
 export const managerFilter = (potentialClients: number): number => {
 	let numberOfClients = 0;
@@ -30,21 +34,10 @@ export const managerFilter = (potentialClients: number): number => {
 	return numberOfClients;
 };
 
-// interface clientOrderI {
-// 	orderId: number;
-// 	priceOfCar: number;
-// 	storageId: number;
-// 	prepayment: number;
-// 	postpayment: number;
-// 	lastDayForShipment: number;
-// 	fineForDelay: number;
-// }
-
+// Класс заказ клиента
 export class ClientOrder {
-	// время поки идет доставка
+	// время пока идет доставка
 	public daysOfShipment: number = 0;
-	// штраф за задержку
-	//public fineForDelay: number = 0;
 	// постоплата
 	public postpayment: number = 0;
 	constructor(
@@ -75,17 +68,22 @@ export class ClientOrder {
 	}
 }
 
+// Интерфейс для структуры данных "машины для отправки"
 interface carsToShipmentI {
 	orderId: number;
 }
 
+// Интерфейс расширяет предыдущий, добавляя новое поле
 interface carsToShipmentFromHankoI extends carsToShipmentI {
 	isForDealership1?: boolean;
 }
+
+// Интерфейс для структуры данных "Количество дней на складе"
 interface numberOfDaysInStorageI {
 	payedMonth: number;
 	daysBeforeShipment: number;
 }
+// Класс автосалон
 export class CarDealershipStorage {
 	// Доход магазина
 	public totalProfit: number = 0;
@@ -105,13 +103,18 @@ export class CarDealershipStorage {
 	public deliveryTime: number;
 	// Время погрузчика в пути
 	public daysOfShipment = 0;
+	// Количество дней в месяце
 	public daysInMonth = 30;
-
+	// Общее количество дней в доставке
 	private totalNumberOfDaysInDelivery = 0;
-	private totalNumbersOfDeliveredCars = 0;
-	public averageDeliveryTime = 0;
 
+	// Общее количество доставленных машин
+	private totalNumbersOfDeliveredCars = 0;
+	// Среднее время доставки
+	public averageDeliveryTime = 0;
+	// Общая сумма оплаты за хранение машин на складе
 	public storageMonthlyPaymentTotal = 0;
+	// Сумма, которую надо платить за один месяц хранения машины
 	public storageMonthlyPayment = 6000;
 	// едет ли погрузчик в другой салон?
 	public isCarTransporterOnRoute = false;
@@ -119,8 +122,11 @@ export class CarDealershipStorage {
 	public orderToHanko: number[] = [];
 	// Конструктор (размер склада, заказ в ханко)
 	constructor(
+		// Максимальный размер склада
 		private maxStorageSize: number,
+		// Стратегия заказа в Ханко
 		orderToHankoStrategy: number,
+		// Время доставки (до другого салона)
 		deliveryTime: number
 	) {
 		this.deliveryTime = deliveryTime;
@@ -132,21 +138,7 @@ export class CarDealershipStorage {
 		});
 		this.clientOrdersArray = [];
 	}
-	// Разместить заказ в ханко
-	// public placeAnOrderToHanko(
-	// 	isForDealership1: boolean,
-	// 	hankoStorage: HankoStorage,
-	// 	orderId: number
-	// ) {
-	// 	this.orderToHanko.forEach((order) => {
-	// 		this.totalExpenses += order;
-	// 		hankoStorage.addCarToMainQue({
-	// 			isForDealership1: isForDealership1,
-	// 			orderId: orderId,
-	// 		});
-	// 	});
-	// }
-	// доставка в ханко id = -10
+	// Рассчитать оплату за хранение
 	public storageRentPayment() {
 		this.numberOfDaysInStorage = this.numberOfDaysInStorage.map(
 			(numberOfDays) => {
@@ -167,6 +159,7 @@ export class CarDealershipStorage {
 			}
 		);
 	}
+	// Заказ в Ханко если пришло время
 	public timeToOrderFromHanko(
 		isForDealership1: boolean,
 		hankoStorage: HankoStorage
@@ -183,6 +176,7 @@ export class CarDealershipStorage {
 			this.orderToHanko = [];
 		}
 	}
+	// Разгрузить автомобили
 	public unloadCarShipment(cars: carsToShipmentI[]) {
 		let newClientOrders = this.clientOrdersArray;
 		let allCarsToStorage = cars.filter((car) => {
@@ -222,18 +216,20 @@ export class CarDealershipStorage {
 			}
 		});
 	}
+	// Проверить не дошел ли погрузчик до другого салона?
 	public checkIfShipmentArrives() {
 		if (this.deliveryTime === this.daysOfShipment) {
 			return true;
 		}
 		return false;
 	}
+	// Выгрузить машины из автопогрузчика
 	public unloadCargo() {
 		this.carsToShipmentArray.shift();
 		this.isCarTransporterOnRoute = false;
 		this.daysOfShipment = 0;
 	}
-
+	// Выбираем случайную машину из автосалона
 	public chooseRandomCar() {
 		let carToChoose = getRandomNumberBetween(1, this.numberOfCars);
 		this.numberOfDaysInStorage = this.numberOfDaysInStorage.map(
@@ -250,15 +246,18 @@ export class CarDealershipStorage {
 		);
 		this.numberOfCars--;
 	}
+	// Добавить в очередь на заказ в Ханко
 	public addToHankoQue(price: number) {
 		this.orderToHanko.push(price);
 	}
+	// Проверка можно ли отправить автопогрузчик в другой салон
 	public isSendCarTransporter() {
 		if (!this.isCarTransporterOnRoute && this.carsToShipmentArray.length > 0) {
 			this.totalExpenses += 15000;
 			this.isCarTransporterOnRoute = true;
 		}
 	}
+	// Прошел еще один день
 	public anotherDayPasses() {
 		if (this.isCarTransporterOnRoute) {
 			this.daysOfShipment++;
@@ -279,21 +278,13 @@ export class CarDealershipStorage {
 			}
 		);
 	}
-	public isCouldPlaceAnOrderToHanko() {
-		if ((this.orderToHanko.length = this.orderToHankoStrategy)) {
-		}
-	}
-
+	// Добавить новый заказ
 	public addNewOrder(clientOrder: ClientOrder) {
 		this.clientOrdersArray.push(clientOrder);
 	}
-	private fulfillOrder(clientId: number) {
-		this.clientOrdersArray.filter((clientOrder) => {
-			clientOrder.orderId != clientId;
-		});
-	}
 }
 
+// Класс "склад в Москве"
 export class MoscowStorage {
 	public minCapacityForShipment: number;
 	public deliveryTime: number;
