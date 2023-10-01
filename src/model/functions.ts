@@ -286,27 +286,40 @@ export class CarDealershipStorage {
 
 // Класс "склад в Москве"
 export class MoscowStorage {
+	// минимальный размер очереди на доставку
 	public minCapacityForShipment: number;
+	// время, за которое происходит доставка
 	public deliveryTime: number;
+	// Автовоз едет в первый автосалон
 	public isCarTransporterOnRoute1 = false;
+	// его время в пути
 	public daysOfShipment1 = 0;
+	// Автовоз едет во второй автосалон
 	public isCarTransporterOnRoute2 = false;
+	// его время в пути
 	public daysOfShipment2 = 0;
+	// машины на первом автовозе
 	public carsOnTransporterToDealership1Array: carsToShipmentI[] = [];
+	// машины на втором автовозе
 	public carsOnTransporterToDealership2Array: carsToShipmentI[] = [];
 	// Очередь на отправку (не поставку)
+	// Очередь в первый салон
 	public shipmentQueToDealership1: carsToShipmentI[] = [];
+	// Очередь во второй салон
 	public shipmentQueToDealership2: carsToShipmentI[] = [];
 	constructor(deliveryTime: number, minCapacityForShipment: number) {
 		this.deliveryTime = deliveryTime;
 		this.minCapacityForShipment = minCapacityForShipment;
 	}
+	// Добавить машины в очередь в первый салон
 	public addCarToShipmentQueToDealership1(car: carsToShipmentI) {
 		this.shipmentQueToDealership1.push(car);
 	}
+	// Добавить машины в очередь во второй салон
 	public addCarToShipmentQueToDealership2(car: carsToShipmentI) {
 		this.shipmentQueToDealership2.push(car);
 	}
+	// Поставка из ханко
 	public shipmentFromHanko(shipment: carsToShipmentFromHankoI[]) {
 		shipment.forEach((car) => {
 			if (car.isForDealership1) {
@@ -320,6 +333,8 @@ export class MoscowStorage {
 			}
 		});
 	}
+	// Проверка отправить ли автопогрузсик в один из салонов
+	// отправка если это так
 	public isSendCarTransporter() {
 		if (!this.isCarTransporterOnRoute1) {
 			if (this.shipmentQueToDealership1.length > this.minCapacityForShipment) {
@@ -372,16 +387,19 @@ export class MoscowStorage {
 			}
 		}
 	}
+	// Разгрузить первый автовоз
 	unloadCargo1() {
 		this.carsOnTransporterToDealership1Array = [];
 		this.isCarTransporterOnRoute1 = false;
 		this.daysOfShipment1 = 0;
 	}
+	// Разгрузить второй автовоз
 	unloadCargo2() {
 		this.carsOnTransporterToDealership2Array = [];
 		this.isCarTransporterOnRoute2 = false;
 		this.daysOfShipment2 = 0;
 	}
+	// Прошел еще один день
 	anotherDayPasses() {
 		if (this.isCarTransporterOnRoute1) {
 			this.daysOfShipment1++;
@@ -390,12 +408,14 @@ export class MoscowStorage {
 			this.daysOfShipment2++;
 		}
 	}
+	// Проверить доехал ли до салона первый автопогрузчик
 	checkIfShipmentArrives1() {
 		if (this.deliveryTime === this.daysOfShipment1) {
 			return true;
 		}
 		return false;
 	}
+	// Проверить доехал ли до салона второй автопогрузчик
 	checkIfShipmentArrives2() {
 		if (this.deliveryTime === this.daysOfShipment2) {
 			return true;
@@ -403,8 +423,9 @@ export class MoscowStorage {
 		return false;
 	}
 }
-
+// Класс "склад в Ханко"
 export class HankoStorage {
+	//
 	public isCarTransporterOnRoute = false;
 	public daysOfShipment = 0;
 	public deliveryTime: number;
