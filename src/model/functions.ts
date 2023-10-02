@@ -34,22 +34,112 @@ export const managerFilter = (potentialClients: number): number => {
 	return numberOfClients;
 };
 
+// Выбор случайной машины
+export const carSelector = () => {
+	const carId = getRandomNumberBetween(1, 4);
+	switch (carId) {
+		case 1:
+			return pricesOfCars.Impreza;
+		case 2:
+			return pricesOfCars.Forester;
+		case 3:
+			return pricesOfCars.Outback;
+		default:
+			return pricesOfCars.Solterra;
+	}
+};
+
+// Выбор случайного склада где она в наличии
+export const storageSelector = () => {
+	const carId = getRandomNumberBetween(1, 10);
+	switch (carId) {
+		case 1:
+		case 2:
+		case 3:
+			return 1;
+		case 4:
+		case 5:
+		case 6:
+			return 2;
+		case 7:
+			return 3;
+		default:
+			return 4;
+	}
+};
+// Выбор случайного склада где машина в наличии, если склады автосалонов пусты
+export const storageSelectorIfDealeshipStorageIsEmpty = () => {
+	const carId = getRandomNumberBetween(1, 4);
+	switch (carId) {
+		case 1:
+			return 3;
+
+		default:
+			return 4;
+	}
+};
+// Рассчитать предоплату
+export const countPrepayment = (
+	prepaymentSize: string,
+	selectedCarPrice: number
+): number => {
+	switch (prepaymentSize) {
+		case '20':
+			return prepaymentGenerator(selectedCarPrice, selectedCarPrice * 0.2);
+		case '40':
+			return prepaymentGenerator(selectedCarPrice, selectedCarPrice * 0.4);
+		case '50':
+			return prepaymentGenerator(selectedCarPrice, selectedCarPrice * 0.5);
+		case '60':
+			return prepaymentGenerator(selectedCarPrice, selectedCarPrice * 0.6);
+		case '80':
+			return prepaymentGenerator(selectedCarPrice, selectedCarPrice * 0.8);
+
+		default:
+			return prepaymentGenerator(selectedCarPrice, 900000);
+	}
+};
+
+// Генерация предоплаты
+const prepaymentGenerator = (carPrice: number, minSum: number): number => {
+	const carPriceThousands = carPrice / 1000;
+	const minSumThosands = minSum / 1000;
+
+	const prepayment = getRandomNumberBetween(minSumThosands, carPriceThousands);
+	console.log('prepayment generator');
+	console.log(carPriceThousands, minSumThosands, prepayment);
+	return prepayment * 1000;
+};
+
+// Выбор крайнего срока в зависимости от склада
+export const selectLastDayOfShipment = (storageId: number) => {
+	switch (storageId) {
+		case 1:
+		case 2:
+			return lastDaysOfShipment.Dealership;
+		case 3:
+			return lastDaysOfShipment.MoscowStorage;
+		default:
+			return lastDaysOfShipment.Factory;
+	}
+};
+
 // Класс заказ клиента
 export class ClientOrder {
-	// время пока идет доставка
+	// Время пока идет доставка
 	public daysOfShipment: number = 0;
-	// постоплата
+	// Постоплата
 	public postpayment: number = 0;
 	constructor(
-		// id заказа
+		// Id заказа
 		public orderId: number,
-		// цена машины
+		// Цена машины
 		public priceOfCar: number,
-		// склад с которого поставка
+		// Склад с которого поставка
 		public storageId: number,
-		// предоплата
+		// Предоплата
 		public prepayment: number,
-		// крайний срок доставки
+		// Крайний срок доставки
 		public lastDayForShipment: number
 	) {
 		this.postpayment = priceOfCar - prepayment;
@@ -116,7 +206,7 @@ export class CarDealershipStorage {
 	public storageMonthlyPaymentTotal = 0;
 	// Сумма, которую надо платить за один месяц хранения машины
 	public storageMonthlyPayment = 6000;
-	// едет ли погрузчик в другой салон?
+	// Едет ли погрузчик в другой салон?
 	public isCarTransporterOnRoute = false;
 	// Заказ в Ханко
 	public orderToHanko: number[] = [];
@@ -159,7 +249,7 @@ export class CarDealershipStorage {
 			}
 		);
 	}
-	// Заказ в Ханко если пришло время
+	// Заказ в Ханко, если пришло время
 	public timeToOrderFromHanko(
 		isForDealership1: boolean,
 		hankoStorage: HankoStorage
@@ -286,21 +376,21 @@ export class CarDealershipStorage {
 
 // Класс "склад в Москве"
 export class MoscowStorage {
-	// минимальный размер очереди на доставку
+	// Минимальный размер очереди на доставку
 	public minCapacityForShipment: number;
-	// время, за которое происходит доставка
+	// Время, за которое происходит доставка
 	public deliveryTime: number;
 	// Автовоз едет в первый автосалон
 	public isCarTransporterOnRoute1 = false;
-	// его время в пути
+	// Его время в пути
 	public daysOfShipment1 = 0;
 	// Автовоз едет во второй автосалон
 	public isCarTransporterOnRoute2 = false;
-	// его время в пути
+	// Его время в пути
 	public daysOfShipment2 = 0;
-	// машины на первом автовозе
+	// Машины на первом автовозе
 	public carsOnTransporterToDealership1Array: carsToShipmentI[] = [];
-	// машины на втором автовозе
+	// Машины на втором автовозе
 	public carsOnTransporterToDealership2Array: carsToShipmentI[] = [];
 	// Очередь на отправку (не поставку)
 	// Очередь в первый салон
@@ -333,7 +423,7 @@ export class MoscowStorage {
 			}
 		});
 	}
-	// Проверка отправить ли автопогрузсик в один из салонов
+	// Проверка - отправить ли автопогрузчик в один из салонов?
 	// отправка если это так
 	public isSendCarTransporter() {
 		if (!this.isCarTransporterOnRoute1) {
@@ -408,14 +498,14 @@ export class MoscowStorage {
 			this.daysOfShipment2++;
 		}
 	}
-	// Проверить доехал ли до салона первый автопогрузчик
+	// Проверить, доехал ли до салона первый автопогрузчик
 	checkIfShipmentArrives1() {
 		if (this.deliveryTime === this.daysOfShipment1) {
 			return true;
 		}
 		return false;
 	}
-	// Проверить доехал ли до салона второй автопогрузчик
+	// Проверить, доехал ли до салона второй автопогрузчик
 	checkIfShipmentArrives2() {
 		if (this.deliveryTime === this.daysOfShipment2) {
 			return true;
@@ -425,37 +515,46 @@ export class MoscowStorage {
 }
 // Класс "склад в Ханко"
 export class HankoStorage {
-	//
+	// Погручик на маршруте
 	public isCarTransporterOnRoute = false;
+	// Время погрузчика в пути
 	public daysOfShipment = 0;
+	// Время за которое происходит доставка
 	public deliveryTime: number;
+	// Минимальный обьем заявок на поставку для отправки автовоза
 	public minCapacityForShipment: number;
+	// Машины в погрузчике
 	public shipmentQue: carsToShipmentFromHankoI[] = [];
+	// Очередь на поставку
 	public mainQue: carsToShipmentFromHankoI[] = [];
 	constructor(deliveryTime: number, minCapacityForShipment: number) {
 		this.deliveryTime = deliveryTime;
 		this.minCapacityForShipment = minCapacityForShipment;
 	}
-
+	// Добавить машину в общую очередь
 	addCarToMainQue(car: carsToShipmentFromHankoI) {
 		this.mainQue.push(car);
 	}
+	// Прошел еще один день
 	anotherDayPasses() {
 		if (this.isCarTransporterOnRoute) {
 			this.daysOfShipment++;
 		}
 	}
+	// Проверить, пришел ли погрузчик на склад
 	checkIfShipmentArrives() {
 		if (this.deliveryTime === this.daysOfShipment) {
 			return true;
 		}
 		return false;
 	}
+	// Разгрузить погрузчик
 	unloadCargo() {
 		this.shipmentQue = [];
 		this.isCarTransporterOnRoute = false;
 		this.daysOfShipment = 0;
 	}
+	// Достаточно ли заявок для отправки погрузчика
 	isSendCarTransporter() {
 		if (!this.isCarTransporterOnRoute) {
 			if (this.mainQue.length > this.minCapacityForShipment) {

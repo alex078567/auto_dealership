@@ -5,11 +5,13 @@ import {
 	managerFilter,
 	CarDealershipStorage,
 	ClientOrder,
-	getRandomNumberBetween,
-	pricesOfCars,
-	lastDaysOfShipment,
 	MoscowStorage,
 	HankoStorage,
+	carSelector,
+	storageSelector,
+	countPrepayment,
+	selectLastDayOfShipment,
+	storageSelectorIfDealeshipStorageIsEmpty,
 } from './model/functions';
 import {
 	Line,
@@ -19,96 +21,6 @@ import {
 	XAxis,
 	YAxis,
 } from 'recharts';
-
-// Выбор случайной машины
-const carSelector = () => {
-	const carId = getRandomNumberBetween(1, 4);
-	switch (carId) {
-		case 1:
-			return pricesOfCars.Impreza;
-		case 2:
-			return pricesOfCars.Forester;
-		case 3:
-			return pricesOfCars.Outback;
-		default:
-			return pricesOfCars.Solterra;
-	}
-};
-
-// Выбор случайного склада где она в наличии
-const storageSelector = () => {
-	const carId = getRandomNumberBetween(1, 10);
-	switch (carId) {
-		case 1:
-		case 2:
-		case 3:
-			return 1;
-		case 4:
-		case 5:
-		case 6:
-			return 2;
-		case 7:
-			return 3;
-		default:
-			return 4;
-	}
-};
-// Выбор случайного склада где машина в наличии, если склады автосалонов пусты
-const storageSelectorIfDealeshipStorageIsEmpty = () => {
-	const carId = getRandomNumberBetween(1, 4);
-	switch (carId) {
-		case 1:
-			return 3;
-
-		default:
-			return 4;
-	}
-};
-
-const countPrepayment = (
-	prepaymentSize: string,
-	selectedCarPrice: number
-): number => {
-	switch (prepaymentSize) {
-		case '20':
-			return prepaymentGenerator(selectedCarPrice, selectedCarPrice * 0.2);
-		case '40':
-			return prepaymentGenerator(selectedCarPrice, selectedCarPrice * 0.4);
-		case '50':
-			return prepaymentGenerator(selectedCarPrice, selectedCarPrice * 0.5);
-		case '60':
-			return prepaymentGenerator(selectedCarPrice, selectedCarPrice * 0.6);
-		case '80':
-			return prepaymentGenerator(selectedCarPrice, selectedCarPrice * 0.8);
-
-		default:
-			return prepaymentGenerator(selectedCarPrice, 900000);
-	}
-};
-
-// Генерация предоплаты
-const prepaymentGenerator = (carPrice: number, minSum: number): number => {
-	const carPriceThousands = carPrice / 1000;
-	const minSumThosands = minSum / 1000;
-
-	const prepayment = getRandomNumberBetween(minSumThosands, carPriceThousands);
-	console.log('prepayment generator');
-	console.log(carPriceThousands, minSumThosands, prepayment);
-	return prepayment * 1000;
-};
-
-// Выбор крайнего срока в зависимости от склада
-const selectLastDayOfShipment = (storageId: number) => {
-	switch (storageId) {
-		case 1:
-		case 2:
-			return lastDaysOfShipment.Dealership;
-		case 3:
-			return lastDaysOfShipment.MoscowStorage;
-		default:
-			return lastDaysOfShipment.Factory;
-	}
-};
 
 interface dataForGraphI {
 	data: number;
@@ -134,6 +46,7 @@ const carDealershipModel = (
 	dataForGraphAverageDeliveryTime: dataForGraphI[];
 	dataForGraphWorkingCapital: dataForGraphI[];
 } => {
+	// Объявляем необходимые переменные
 	let totalClients = 0;
 	let dataForGraphProfit: dataForGraphI[] = [{ data: 0, day: 0 }];
 	let dataForGraphExpenses: dataForGraphI[] = [{ data: 0, day: 0 }];
@@ -152,9 +65,8 @@ const carDealershipModel = (
 	let totalAverageDeliveryTime = 0;
 	let totalSum = 0;
 	let totalExpenses = 0;
-	const STORAGE_MONTHLY_PAYMENT = 6000;
-	const DAYS_IN_MONTH = 30;
 	let orderId = 0;
+	// Создаем экземпляры классов
 	const hankoStorage = new HankoStorage(timeFromHanko, hankoTransporterSize);
 	const moscowStorage = new MoscowStorage(
 		timeFromMoscow,
@@ -170,41 +82,32 @@ const carDealershipModel = (
 		orderStrategy,
 		4
 	);
-
+	// Пустые очереди текущих заказов
 	let currentOrdersDealership1 = [];
 	let currentOrdersDealership2 = [];
 
-	//-------------------------------
-	// Разгрузка погрузчиков, выдача заказов
-	//-------------------------------
-
+	// Цикл, каждый шаг которого это один день
 	for (let i = 1; i < numberOfIterations; i++) {
-		totalAverageDeliveryTime = 0;
 		//-------------------------------
 		// Генерация потенциальных клиентов
 		//-------------------------------
 		const potentialClientsDealership1 = potentialClientGenerator(1, 10);
 		const potentialClientsDealership2 = potentialClientGenerator(1, 10);
-		console.log('potential clients');
-		console.log(potentialClientsDealership1);
-		console.log(potentialClientsDealership2);
 
 		//-------------------------------
 		// 10% становятся клиентами
 		//-------------------------------
 		const actualClientsDealership1 = managerFilter(potentialClientsDealership1);
 		const actualClientsDealership2 = managerFilter(potentialClientsDealership2);
-		console.log('real clients');
-		console.log(actualClientsDealership1);
-		console.log(actualClientsDealership2);
 		totalClients += actualClientsDealership1 + actualClientsDealership2;
+
 		//-------------------------------
 		// Генератор заявок для каждого клиента
 		//-------------------------------
+
 		for (let j = 0; j < actualClientsDealership1; j++) {
 			const selectedCarPrice = carSelector();
 			const selectedStorage = storageSelector();
-
 			const order = new ClientOrder(
 				orderId,
 				selectedCarPrice,
@@ -212,10 +115,10 @@ const carDealershipModel = (
 				countPrepayment(prepaymentSize, selectedCarPrice),
 				selectLastDayOfShipment(selectedStorage)
 			);
-
 			orderId++;
 			currentOrdersDealership1.push(order);
 		}
+
 		for (let k = 1; k < actualClientsDealership2; k++) {
 			const selectedCarPrice = carSelector();
 			const selectedStorage = storageSelector();
@@ -226,20 +129,16 @@ const carDealershipModel = (
 				countPrepayment(prepaymentSize, selectedCarPrice),
 				selectLastDayOfShipment(selectedStorage)
 			);
-
 			orderId++;
 			currentOrdersDealership2.push(order);
 		}
-		console.log('current orders');
-		console.log(currentOrdersDealership1);
-		console.log(currentOrdersDealership2);
+
 		//-----------------------------
 		// обработка заявок
 		//-----------------------------
-
 		currentOrdersDealership1.forEach((order: ClientOrder) => {
 			const newOrder = order;
-			// если машина на складе автосалона
+			// Если заказ из второго салона, а его склад пуст
 			if (newOrder.storageId === 2 && carDealership2.numberOfCars == 0) {
 				newOrder.storageId = 1;
 			}
